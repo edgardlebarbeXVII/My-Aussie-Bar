@@ -3,33 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Aussie Bar Master - FORCE 19</title>
+    <title>Aussie Bar Master - Final Edition</title>
     <style>
         :root { --gold: #d4af37; --bg: #0b0b0b; --card: #161616; --accent: #2a2a2a; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f0f0f0; padding: 10px; margin: 0; padding-bottom: 80px; }
         
-        /* Liste & Filtres */
+        /* Filtres */
         .base-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .filter-btn { background: var(--card); border: 1px solid var(--accent); color: #aaa; padding: 8px 15px; border-radius: 20px; font-size: 11px; white-space: nowrap; cursor: pointer; }
         .filter-btn.active { background: var(--gold); color: black; font-weight: bold; }
 
-        .cocktail-card { background: var(--card); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--accent); display: flex; align-items: center; cursor: pointer; }
-        .card-img { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 25px; background: #222; border-radius: 12px 0 0 12px; }
-        .card-body { padding: 10px; flex-grow: 1; }
-        .card-title { font-weight: bold; color: var(--gold); font-size: 15px; }
+        /* Cartes avec Aperçu */
+        .cocktail-card { background: var(--card); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--accent); display: flex; align-items: stretch; cursor: pointer; }
+        .card-img { width: 60px; display: flex; align-items: center; justify-content: center; font-size: 25px; background: #222; border-radius: 12px 0 0 12px; border-right: 1px solid var(--accent); }
+        .card-body { padding: 10px; flex-grow: 1; min-width: 0; }
+        .card-title { font-weight: bold; color: var(--gold); font-size: 15px; margin-bottom: 4px; }
+        .card-preview { font-size: 11px; color: #ddd; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .card-garnish { font-size: 10px; color: var(--green); margin-top: 4px; font-weight: bold; }
 
-        /* MODAL AVEC TOOLBAR FIXE EN HAUT */
+        /* Modal Toolbar */
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; flex-direction: column; }
-        .modal-toolbar { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px; background: #1a1a1a; border-bottom: 2px solid var(--gold);
-            position: sticky; top: 0; width: 100%; box-sizing: border-box;
-        }
+        .modal-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1a1a1a; border-bottom: 2px solid var(--gold); position: sticky; top: 0; }
         .modal-scroll-area { flex-grow: 1; overflow-y: auto; padding: 20px; }
-        
         .panic-ings { font-size: 26px; line-height: 1.4; color: #fff; background: #111; padding: 15px; border-radius: 10px; font-weight: bold; white-space: pre-line; border-left: 5px solid var(--gold); }
         
-        /* Navigation Bas */
+        /* Nav Bas */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #111; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid var(--accent); }
         .nav-item { color: #555; text-align: center; flex: 1; font-size: 10px; cursor: pointer; }
         .nav-item.active { color: var(--gold); }
@@ -45,8 +43,8 @@
 
 <div id="modal">
     <div class="modal-toolbar">
-        <button onclick="closeModal()" style="background:none; border:none; color:#fff; font-size:25px; padding: 5px;">✕</button>
-        <h3 id="m-title" style="color:var(--gold); margin:0; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:50%;"></h3>
+        <button onclick="closeModal()" style="background:none; border:none; color:#fff; font-size:25px;">✕</button>
+        <h3 id="m-title" style="color:var(--gold); margin:0; font-size:16px;"></h3>
         <div style="display:flex; gap:20px;">
             <button id="m-edit-icon" style="background:none; border:none; color:var(--gold); font-size:24px;">✏️</button>
             <button id="m-del-icon" style="background:none; border:none; color:var(--red); font-size:24px;">🗑️</button>
@@ -61,11 +59,10 @@
             </div>
         </div>
         <div id="m-edit-div" style="display:none;">
-            <p style="color:var(--gold); font-weight:bold;">MODIFIER LA RECETTE :</p>
             <textarea id="edit-ings-val" rows="6"></textarea>
             <input type="text" id="edit-garnish-val" placeholder="Garniture">
             <textarea id="edit-meth-val" rows="3"></textarea>
-            <button class="btn-main" onclick="saveEdits()">ENREGISTRER LES MODIFICATIONS</button>
+            <button class="btn-main" onclick="saveEdits()">ENREGISTRER</button>
             <button class="btn-main" style="background:#444; color:#fff;" onclick="toggleEditMode(false)">ANNULER</button>
         </div>
     </div>
@@ -73,7 +70,6 @@
 
 <div class="container">
     <h1>🍸 Aussie Bar Master</h1>
-    
     <div id="view-list" class="view active">
         <div class="base-filters" id="top-filters"></div>
         <input type="text" id="search" placeholder="Chercher un cocktail..." oninput="render()">
@@ -81,11 +77,11 @@
     </div>
 
     <div id="view-add" class="view">
-        <h2 style="color:var(--gold);">Ajouter Cocktail</h2>
+        <h2 style="color:var(--gold);">Nouveau Cocktail</h2>
         <input type="text" id="add-name" placeholder="Nom">
         <div id="add-base-selection" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; background:#111; padding:10px; border-radius:10px; margin-bottom:10px;"></div>
-        <input type="text" id="add-garnish" placeholder="Garniture">
-        <textarea id="add-ings" placeholder="Recette (ex: 1.5oz Vodka...)" rows="3"></textarea>
+        <input type="text" id="add-garnish" placeholder="Garnish">
+        <textarea id="add-ings" placeholder="Recette" rows="3"></textarea>
         <textarea id="add-meth" placeholder="Méthode" rows="2"></textarea>
         <button class="btn-main" onclick="saveNew()">ENREGISTRER</button>
     </div>
@@ -107,43 +103,48 @@
 
 <script>
     const spirits = ['Vodka', 'Gin', 'Tequila', 'Mezcal', 'Rhum', 'Bourbon', 'Scotch', 'Whisky', 'Liqueur', 'Vermouth', 'Wine', 'NoAlc'];
-    
     const baseRecipes = [
-        { id:'b1', name:"Mojito", bases:["Rhum"], glass:"🥤", ings:"2oz Rhum blanc\n1oz Lime\n0.5oz Sucre\nMenthe\nSoda", garnish:"Bouquet menthe", method:"Build & Muddle" },
-        { id:'b2', name:"Margarita", bases:["Tequila"], glass:"🍸", ings:"1.5oz Tequila\n1oz Triple Sec\n0.75oz Lime", garnish:"Sel & Lime", method:"Shake & Strain" },
-        { id:'b3', name:"Negroni", bases:["Gin"], glass:"🥃", ings:"1oz Gin\n1oz Campari\n1oz Vermouth Rouge", garnish:"Zeste orange", method:"Stir" },
-        { id:'b4', name:"Espresso Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka\n1oz Liqueur Café\n1oz Espresso", garnish:"3 grains café", method:"Hard Shake" },
-        { id:'b5', name:"Pornstar Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka\n1oz Passion\n0.5oz Lime\n0.5oz Vanille", garnish:"Demi passion", method:"Shake" },
-        { id:'b6', name:"Amaretto Sour", bases:["Bourbon"], glass:"🥃", ings:"1oz Amaretto\n1oz Bourbon\n1oz Lime\n0.5oz Sucre\nBlanc d'œuf", garnish:"Cerise & Orange", method:"Dry Shake" },
-        { id:'b7', name:"Bloody Mary", bases:["Vodka"], glass:"🥤", ings:"1.5oz Vodka\n3oz Jus Tomate\n0.5oz Citron\nTabasco\nSel céleri", garnish:"Céleri", method:"Rolling" },
-        { id:'b8', name:"Cosmopolitan", bases:["Vodka"], glass:"🍸", ings:"1oz Vodka\n0.5oz Triple Sec\n0.5oz Lime\n1oz Cranberry", garnish:"Zeste orange", method:"Shake" },
-        { id:'b9', name:"Daiquiri", bases:["Rhum"], glass:"🍸", ings:"2oz Rhum Blanc\n1oz Lime\n0.75oz Sucre", garnish:"Lime", method:"Shake" },
-        { id:'b10', name:"Pina Colada", bases:["Rhum"], glass:"🍹", ings:"2oz Rhum blanc\n1oz Coco\n3oz Jus d'ananas", garnish:"Ananas", method:"Shake" },
-        { id:'b11', name:"Long Island", bases:["Vodka","Gin","Rhum","Tequila"], glass:"🥤", ings:"0.5oz de chaque alcool\nLime, Cola", garnish:"Citron", method:"Build" },
-        { id:'b12', name:"French Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka\n0.5oz Chambord\n2oz Jus d'ananas", garnish:"Framboise", method:"Shake" },
-        { id:'b13', name:"Lychee Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka\n1oz Liqueur Litchi\n0.5oz Vermouth", garnish:"Litchis", method:"Shake" },
-        { id:'b14', name:"Aperol Spritz", bases:["Wine"], glass:"🍹", ings:"3oz Prosecco\n2oz Aperol\n1oz Soda", garnish:"Orange", method:"Build" },
-        { id:'b15', name:"Limoncello Spritz", bases:["Wine"], glass:"🍹", ings:"2oz Limoncello\n3oz Prosecco\nSoda", garnish:"Citron", method:"Build" },
-        { id:'b16', name:"The Ruby", bases:["Gin"], glass:"🍸", ings:"1.5oz Gin\nRhubarbe\nFramboise\nVanille", garnish:"Framboise", method:"Shake" },
-        { id:'b17', name:"Tropico Spritz", bases:["Vodka"], glass:"🍹", ings:"1oz Vodka\nPêche, Passion, Mangue\nProsecco", garnish:"Passion", method:"Build" },
-        { id:'b18', name:"Spicy Margarita", bases:["Tequila"], glass:"🥃", ings:"2oz Tequila\nPastèque, Lime, Piment", garnish:"Bord pimenté", method:"Shake" },
-        { id:'b19', name:"Tommy's Margo", bases:["Tequila"], glass:"🥃", ings:"2oz Tequila\n1oz Lime\n0.5oz Agave", garnish:"Lime", method:"Shake" }
+        { id:'b1', name:"Mojito", bases:["Rhum"], glass:"🥤", ings:"2oz Rhum blanc, 1oz Lime, 0.5oz Sucre, Menthe, Soda", garnish:"Bouquet menthe", method:"Build & Muddle" },
+        { id:'b2', name:"Margarita", bases:["Tequila"], glass:"🍸", ings:"1.5oz Tequila, 1oz Triple Sec, 0.75oz Lime", garnish:"Sel & Lime", method:"Shake & Strain" },
+        { id:'b3', name:"Negroni", bases:["Gin"], glass:"🥃", ings:"1oz Gin, 1oz Campari, 1oz Vermouth Rouge", garnish:"Zeste orange", method:"Stir" },
+        { id:'b4', name:"Espresso Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", garnish:"3 grains café", method:"Shake" },
+        { id:'b5', name:"Pornstar Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka, 1oz Passion, 0.5oz Lime, 0.5oz Vanille", garnish:"Demi passion", method:"Shake" },
+        { id:'b6', name:"Amaretto Sour", bases:["Bourbon"], glass:"🥃", ings:"1oz Amaretto, 1oz Bourbon, 1oz Lime, 0.5oz Sucre", garnish:"Cerise & Orange", method:"Dry Shake" },
+        { id:'b7', name:"Bloody Mary", bases:["Vodka"], glass:"🥤", ings:"1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron, Tabasco", garnish:"Céleri & Citron", method:"Rolling" },
+        { id:'b8', name:"Cosmopolitan", bases:["Vodka"], glass:"🍸", ings:"1oz Vodka, 0.5oz Triple Sec, 0.5oz Lime, 1oz Cranberry", garnish:"Zeste orange", method:"Shake" },
+        { id:'b9', name:"Daiquiri", bases:["Rhum"], glass:"🍸", ings:"2oz Rhum Blanc, 1oz Lime, 0.75oz Sucre", garnish:"Lime", method:"Shake" },
+        { id:'b10', name:"Pina Colada", bases:["Rhum"], glass:"🍹", ings:"2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", garnish:"Ananas", method:"Shake" },
+        { id:'b11', name:"Long Island", bases:["Vodka","Gin","Rhum","Tequila"], glass:"🥤", ings:"0.5oz de chaque alcool, Lime, Cola", garnish:"Citron", method:"Build" },
+        { id:'b12', name:"French Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka, 0.5oz Chambord, 2oz Jus d'ananas", garnish:"Framboise", method:"Shake" },
+        { id:'b13', name:"Lychee Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka, 1oz Liqueur Litchi, 0.5oz Vermouth", garnish:"Litchis", method:"Shake" },
+        { id:'b14', name:"Aperol Spritz", bases:["Wine"], glass:"🍹", ings:"3oz Prosecco, 2oz Aperol, 1oz Soda", garnish:"Orange", method:"Build" },
+        { id:'b15', name:"Limoncello Spritz", bases:["Wine"], glass:"🍹", ings:"2oz Limoncello, 3oz Prosecco, Soda", garnish:"Citron", method:"Build" },
+        { id:'b16', name:"The Ruby", bases:["Gin"], glass:"🍸", ings:"1.5oz Gin, Rhubarbe, Framboise, Vanille", garnish:"Framboise", method:"Shake" },
+        { id:'b17', name:"Tropico Spritz", bases:["Vodka"], glass:"🍹", ings:"1oz Vodka, Pêche, Passion, Mangue, Prosecco", garnish:"Passion", method:"Build" },
+        { id:'b18', name:"Spicy Margarita", bases:["Tequila"], glass:"🥃", ings:"2oz Tequila, Pastèque, Lime, Piment", garnish:"Bord pimenté", method:"Shake" },
+        { id:'b19', name:"Tommy's Margo", bases:["Tequila"], glass:"🥃", ings:"2oz Tequila, 1oz Lime, 0.5oz Agave", garnish:"Lime", method:"Shake" }
     ];
 
-    let customs = JSON.parse(localStorage.getItem('bar_vF_list')) || [];
-    let edits = JSON.parse(localStorage.getItem('bar_vF_edits')) || {};
+    let customs = JSON.parse(localStorage.getItem('bar_v_FINAL_list')) || [];
+    let edits = JSON.parse(localStorage.getItem('bar_v_FINAL_edits')) || {};
     let curId = null; let curBase = 'ALL';
 
-    function getFinal() { 
-        return [...baseRecipes, ...customs].map(r => edits[r.id] ? {...r, ...edits[r.id]} : r); 
-    }
+    function getFinal() { return [...baseRecipes, ...customs].map(r => edits[r.id] ? {...r, ...edits[r.id]} : r); }
 
     function render() {
         const q = document.getElementById('search').value.toLowerCase();
         const container = document.getElementById('list'); container.innerHTML = "";
         getFinal().filter(r => curBase === 'ALL' || r.bases.includes(curBase)).sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
             if(r.name.toLowerCase().includes(q)) {
-                container.innerHTML += `<div class="cocktail-card" onclick="openModal('${r.id}')"><div class="card-img">${r.glass||'🍸'}</div><div class="card-body"><div class="card-title">${r.name}</div><div style="font-size:11px;color:#777;">✨ ${r.garnish}</div></div></div>`;
+                container.innerHTML += `
+                    <div class="cocktail-card" onclick="openModal('${r.id}')">
+                        <div class="card-img">${r.glass||'🍸'}</div>
+                        <div class="card-body">
+                            <div class="card-title">${r.name}</div>
+                            <div class="card-preview">${r.ings.substring(0, 45)}...</div>
+                            <div class="card-garnish">✨ ${r.garnish}</div>
+                        </div>
+                    </div>`;
             }
         });
     }
@@ -154,20 +155,9 @@
         document.getElementById('m-ings').innerText = r.ings;
         document.getElementById('m-garnish').innerText = r.garnish;
         document.getElementById('m-meth').innerText = r.method;
-        
         toggleEditMode(false);
-        
-        // Bouton Suppression visible seulement pour les cocktails ajoutés par toi
         document.getElementById('m-del-icon').style.visibility = id.startsWith('c') ? 'visible' : 'hidden';
-        
-        document.getElementById('m-del-icon').onclick = () => { 
-            if(confirm('Supprimer ce cocktail ?')) { 
-                customs = customs.filter(x => x.id !== id); 
-                localStorage.setItem('bar_vF_list', JSON.stringify(customs)); 
-                render(); closeModal(); 
-            } 
-        };
-        
+        document.getElementById('m-del-icon').onclick = () => { if(confirm('Supprimer ?')) { customs = customs.filter(x => x.id !== id); localStorage.setItem('bar_v_FINAL_list', JSON.stringify(customs)); render(); closeModal(); } };
         document.getElementById('m-edit-icon').onclick = () => toggleEditMode(true, r);
         document.getElementById('modal').style.display = 'flex';
     }
@@ -184,7 +174,7 @@
 
     function saveEdits() {
         edits[curId] = { ings: document.getElementById('edit-ings-val').value, garnish: document.getElementById('edit-garnish-val').value, method: document.getElementById('edit-meth-val').value };
-        localStorage.setItem('bar_vF_edits', JSON.stringify(edits));
+        localStorage.setItem('bar_v_FINAL_edits', JSON.stringify(edits));
         render(); closeModal();
     }
 
@@ -193,7 +183,7 @@
         const b = Array.from(document.querySelectorAll('#add-base-selection input:checked')).map(i => i.value);
         if(n && b.length > 0) {
             customs.push({ id:'c'+Date.now(), name:n, bases:b, ings:document.getElementById('add-ings').value, garnish:document.getElementById('add-garnish').value, method:document.getElementById('add-meth').value, glass:'🍸' });
-            localStorage.setItem('bar_vF_list', JSON.stringify(customs));
+            localStorage.setItem('bar_v_FINAL_list', JSON.stringify(customs));
             render(); tab('view-list', document.querySelector('.nav-item'));
         } else { alert("Nom et Base requis !"); }
     }
@@ -216,7 +206,7 @@
         document.getElementById('q-content').innerHTML = `<h3>${r.name}</h3><p>Garnish: ${r.garnish}</p>`;
         let opts = [r.ings]; while(opts.length < 3) { let f = all[Math.floor(Math.random()*all.length)].ings; if(!opts.includes(f)) opts.push(f); }
         opts.sort(() => Math.random()-0.5);
-        document.getElementById('q-choices').innerHTML = opts.map(o => `<button class="btn-main" style="background:#222;color:#fff;margin-bottom:10px;text-align:left;font-size:13px;" onclick="this.style.background='${o===r.ings?'#27ae60':'#e74c3c'}'; document.getElementById('q-next').style.display='block';">${o}</button>`).join('');
+        document.getElementById('q-choices').innerHTML = opts.map(o => `<button class="btn-main" style="background:#222;color:#fff;margin-bottom:10px;text-align:left;font-size:12px;" onclick="this.style.background='${o===r.ings?'#27ae60':'#e74c3c'}'; document.getElementById('q-next').style.display='block';">${o}</button>`).join('');
     }
 
     window.onload = () => {
