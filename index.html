@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aussie Bar Master - Editor Edition</title>
+    <title>Aussie Bar Master - Ultimate Edition</title>
     <style>
         :root { --gold: #d4af37; --bg: #0b0b0b; --card: #161616; --accent: #2a2a2a; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f0f0f0; padding: 10px; margin: 0; padding-bottom: 90px; }
@@ -13,8 +13,9 @@
         .nav-item { color: #555; cursor: pointer; font-size: 10px; text-align: center; flex: 1; }
         .nav-item.active { color: var(--gold); }
         .nav-item span { display: block; font-size: 22px; margin-bottom: 4px; }
-        .view { display: none; }
+        .view { display: none; animation: fadeIn 0.4s; }
         .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .cocktail-card { background: var(--card); border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--accent); display: flex; overflow: hidden; align-items: center; cursor: pointer; }
         .card-img { width: 75px; height: 75px; display: flex; align-items: center; justify-content: center; font-size: 35px; background: #222; border-right: 1px solid var(--accent); }
         .card-body { padding: 12px; flex-grow: 1; min-width: 0; }
@@ -24,7 +25,7 @@
         .modal-content { background: var(--card); border: 2px solid var(--gold); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; position: relative; }
         .btn-gold { background: var(--gold); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
         input, textarea { background: #222; border: 1px solid var(--accent); color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; }
-        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gold); }
+        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gold); }
     </style>
 </head>
 <body>
@@ -43,11 +44,11 @@
             <button class="btn-gold" style="background:#444; color:white; margin-top:5px;" onclick="closeModal()">FERMER</button>
         </div>
         <div id="m-edit-form" style="display:none; text-align: left;">
-            <h3 style="color:var(--gold);">Modifier Recette</h3>
+            <h3 style="color:var(--gold);">Modifier</h3>
             <label style="font-size:12px; color:#888;">Ingrédients</label>
-            <textarea id="edit-ings" rows="4"></textarea>
+            <textarea id="edit-ings" rows="5"></textarea>
             <label style="font-size:12px; color:#888;">Méthode</label>
-            <textarea id="edit-method" rows="3"></textarea>
+            <textarea id="edit-method" rows="4"></textarea>
             <button class="btn-gold" id="m-save-btn">SAUVEGARDER</button>
             <button class="btn-gold" style="background:#444; color:white;" onclick="toggleEdit(false)">ANNULER</button>
         </div>
@@ -60,103 +61,42 @@
         <input type="text" id="search-bar" placeholder="Chercher un cocktail..." oninput="render()">
         <div id="cocktail-list"></div>
     </div>
+
     <div id="view-quiz" class="view">
         <div id="quiz-area" style="background:var(--card); padding:20px; border-radius:15px; border:1px solid var(--gold); text-align:center;"></div>
         <button id="next-btn" class="btn-gold" style="display:none;" onclick="generateQuiz()">SUIVANT</button>
+    </div>
+
+    <div id="view-audio" class="view" style="text-align:center; padding: 50px 20px;">
+        <span style="font-size:80px;">🎧</span>
+        <button class="btn-gold" onclick="startAudioReview()">LANCER LA RÉVISION</button>
+        <button class="btn-gold" style="background:#444; color:white;" onclick="stopAudio()">STOP</button>
     </div>
 </div>
 
 <div class="bottom-nav">
     <div class="nav-item active" onclick="switchView('view-list', this)"><span>📖</span>Carte</div>
     <div class="nav-item" onclick="switchView('view-quiz', this)"><span>🧠</span>Quiz</div>
+    <div class="nav-item" onclick="switchView('view-audio', this)"><span>🎧</span>Audio</div>
 </div>
 
 <script>
     const synth = window.speechSynthesis;
-    // On charge les modifications depuis le localStorage
     let overrides = JSON.parse(localStorage.getItem('cocktail_overrides')) || {};
     
     const baseRecipes = [
-        { id: 'blo', name: "Bloody Mary", glass: "🥤", color: "#d32f2f", ings: "1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron vert, 2 traits Tabasco, 2 traits Worcestershire, Sel de céleri, Poivre", method: "Rolling (mélanger sans shaker fort). Servir sur glace avec céleri et citron." },
-        { id: 'ama', name: "Amaretto Sour", glass: "🥃", color: "#a1887f", ings: "1oz Amaretto, 1oz Bourbon, 1oz Citron vert, 0.5oz Sucre, Blanc d'oeuf", method: "Dry shake puis shake avec glace." },
-        { id: 'moj', name: "Mojito", glass: "🥤", color: "#4caf50", ings: "2oz Rhum blanc, 1oz Citron vert, Menthe, 0.5oz Sucre, Soda", method: "Piler menthe/citron. Ajouter glace pilée et soda." },
+        { id: 'ama', name: "Amaretto Sour", glass: "🥃", color: "#a1887f", ings: "1oz Amaretto, 1oz Bourbon, 1oz Citron vert, 0.5oz Sucre, Blanc d'oeuf", method: "Dry shake puis shake avec glace. Cerise et Angostura." },
+        { id: 'blo', name: "Bloody Mary", glass: "🥤", color: "#d32f2f", ings: "1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron, Tabasco, Worcestershire, Sel de céleri, Poivre", method: "Rolling (mélanger sans shaker fort). Céleri et citron." },
+        { id: 'moj', name: "Mojito", glass: "🥤", color: "#4caf50", ings: "2oz Rhum blanc, 1oz Citron vert, Menthe, 0.5oz Sucre, Soda", method: "Piler menthe/citron. Glace pilée et soda." },
         { id: 'spr', name: "Aperol Spritz", glass: "🍹", color: "#ff5722", ings: "3oz Prosecco, 2oz Aperol, 1oz Soda", method: "Glace, orange et olive." },
         { id: 'mar', name: "Margarita", glass: "🍸", color: "#c0ca33", ings: "1.5oz Tequila, 1oz Triple Sec, 0.75oz Citron vert", method: "Shaker. Bord salé." },
-        { id: 'cos', name: "Cosmopolitan", glass: "🍸", color: "#f06292", ings: "1oz Vodka, 0.5oz Triple Sec, 0.5oz Lime, 1oz Cranberry", method: "Shaker." },
-        { id: 'esp', name: "Espresso Martini", glass: "🍸", color: "#3e2723", ings: "1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", method: "Shaker fort." }
-    ];
-
-    function getFinalRecipes() {
-        return baseRecipes.map(r => {
-            if(overrides[r.id]) {
-                return { ...r, ings: overrides[r.id].ings, method: overrides[r.id].method };
-            }
-            return r;
-        });
-    }
-
-    function render() {
-        const query = document.getElementById('search-bar').value.toLowerCase();
-        const list = document.getElementById('cocktail-list');
-        list.innerHTML = "";
-        getFinalRecipes().sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
-            if(r.name.toLowerCase().includes(query)) {
-                const card = document.createElement('div');
-                card.className = 'cocktail-card';
-                card.onclick = () => openModal(r);
-                card.innerHTML = `<div class="card-img" style="background:linear-gradient(135deg,${r.color},#000)">${r.glass}</div><div class="card-body"><div class="card-title">${r.name}</div><div class="card-subtitle">${r.ings}</div></div>`;
-                list.appendChild(card);
-            }
-        });
-    }
-
-    let currentEditingId = null;
-
-    function openModal(r) {
-        currentEditingId = r.id;
-        document.getElementById('m-title').innerText = r.name;
-        document.getElementById('m-glass').innerText = r.glass;
-        document.getElementById('m-ings').innerText = r.ings;
-        document.getElementById('m-method').innerText = r.method;
-        
-        document.getElementById('edit-ings').value = r.ings;
-        document.getElementById('edit-method').value = r.method;
-        
-        document.getElementById('m-speak-btn').onclick = () => speak(`${r.name}. ${r.ings}`);
-        document.getElementById('m-save-btn').onclick = () => saveEdit();
-        document.getElementById('m-edit-btn').onclick = () => toggleEdit(true);
-        
-        toggleEdit(false);
-        document.getElementById('modal').style.display = 'flex';
-    }
-
-    function toggleEdit(isEditing) {
-        document.getElementById('m-display').style.display = isEditing ? 'none' : 'block';
-        document.getElementById('m-edit-form').style.display = isEditing ? 'block' : 'none';
-        document.getElementById('m-edit-btn').style.display = isEditing ? 'none' : 'block';
-    }
-
-    function saveEdit() {
-        const newIngs = document.getElementById('edit-ings').value;
-        const newMethod = document.getElementById('edit-method').value;
-        
-        overrides[currentEditingId] = { ings: newIngs, method: newMethod };
-        localStorage.setItem('cocktail_overrides', JSON.stringify(overrides));
-        
-        render();
-        const updated = getFinalRecipes().find(x => x.id === currentEditingId);
-        openModal(updated);
-    }
-
-    function closeModal() { document.getElementById('modal').style.display = 'none'; }
-    function speak(t) { synth.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'fr-FR'; synth.speak(u); }
-    function switchView(viewId, el) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-    }
-    render();
-</script>
-</body>
-</html>
+        { id: 'cos', name: "Cosmopolitan", glass: "🍸", color: "#f06292", ings: "1oz Vodka, 0.5oz Triple Sec, 0.5oz Lime, 1oz Cranberry", method: "Shaker. Double filtrer." },
+        { id: 'dai', name: "Daiquiri", glass: "🍸", color: "#f1f8e9", ings: "2oz Rhum Blanc, 1oz Citron vert, 0.75oz Sucre", method: "Shaker intense." },
+        { id: 'fre', name: "French Martini", glass: "🍸", color: "#9c27b0", ings: "1.5oz Vodka, 0.5oz Chambord, 2oz Jus d'ananas", method: "Shaker très fort pour la mousse." },
+        { id: 'lit', name: "Long Island Ice Tea", glass: "🥤", color: "#795548", ings: "0.5oz Vodka/Gin/Rhum/Tequila/Triple Sec + Citron + Cola", method: "Sur glace. Top Cola." },
+        { id: 'por', name: "Pornstar Martini", glass: "🍸", color: "#ff9800", ings: "1.5oz Vodka Vanille, 1oz Passion, 0.5oz Lime. Side Prosecco", method: "Shaker alcools. Passion dessus." },
+        { id: 'lyc', name: "Lychee Martini", glass: "🍸", color: "#f8bbd0", ings: "1.5oz Vodka, 1oz Liqueur Litchi, 0.5oz Vermouth", method: "Shaker. Garnir litchis." },
+        { id: 'pin', name: "Pina Colada", glass: "🍹", color: "#fff9c4", ings: "2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", method: "Shaker ou Blender." },
+        { id: 'neg', name: "Negroni", glass: "🥃", color: "#e74c3c", ings: "1oz Gin, 1oz Campari, 1oz Vermouth Rouge", method: "Mélanger 20s. Zeste orange." },
+        {
+    
