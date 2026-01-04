@@ -98,5 +98,92 @@
         { id: 'lyc', name: "Lychee Martini", glass: "🍸", color: "#f8bbd0", ings: "1.5oz Vodka, 1oz Liqueur Litchi, 0.5oz Vermouth", method: "Shaker. Garnir litchis." },
         { id: 'pin', name: "Pina Colada", glass: "🍹", color: "#fff9c4", ings: "2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", method: "Shaker ou Blender." },
         { id: 'neg', name: "Negroni", glass: "🥃", color: "#e74c3c", ings: "1oz Gin, 1oz Campari, 1oz Vermouth Rouge", method: "Mélanger 20s. Zeste orange." },
-        {
-    
+        { id: 'esp', name: "Espresso Martini", glass: "🍸", color: "#3e2723", ings: "1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", method: "Shaker fort. 3 grains café." },
+        { id: 'ruby', name: "The Ruby", glass: "🍸", color: "#ff4081", ings: "1.5oz Gin Hendrick's, Rhubarbe, Framboise, Vanille", method: "Signature. Shaker." },
+        { id: 'trop', name: "Tropico Spritz", glass: "🍹", color: "#ffab40", ings: "1oz Vodka, Pêche, Passion, Mangue, Prosecco", method: "Construire sur glace." },
+        { id: 'spic', name: "Spicy Margarita", glass: "🥃", color: "#fb8c00", ings: "2oz Tequila, Pastèque, Citron vert, Piment", method: "Bord pimenté." },
+        { id: 'tom', name: "Tommy's Margo", glass: "🥃", color: "#ffd54f", ings: "2oz Tequila, 1oz Lime, 0.5oz Agave", method: "Shaker sur glace." },
+        { id: 'limo', name: "Limoncello Spritz", glass: "🍹", color: "#ffeb3b", ings: "2oz Limoncello, 3oz Prosecco, Soda, Romarin", method: "Verre à vin." }
+    ];
+
+    function getFinalRecipes() {
+        return baseRecipes.map(r => {
+            if(overrides[r.id]) {
+                return { ...r, ings: overrides[r.id].ings, method: overrides[r.id].method };
+            }
+            return r;
+        });
+    }
+
+    function render() {
+        const query = document.getElementById('search-bar').value.toLowerCase();
+        const list = document.getElementById('cocktail-list');
+        list.innerHTML = "";
+        getFinalRecipes().sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
+            if(r.name.toLowerCase().includes(query)) {
+                const card = document.createElement('div');
+                card.className = 'cocktail-card';
+                card.onclick = () => openModal(r);
+                card.innerHTML = `<div class="card-img" style="background:linear-gradient(135deg,${r.color},#000)">${r.glass}</div><div class="card-body"><div class="card-title">${r.name}</div><div class="card-subtitle">${r.ings}</div></div>`;
+                list.appendChild(card);
+            }
+        });
+    }
+
+    let currentEditingId = null;
+    function openModal(r) {
+        currentEditingId = r.id;
+        document.getElementById('m-title').innerText = r.name;
+        document.getElementById('m-glass').innerText = r.glass;
+        document.getElementById('m-ings').innerText = r.ings;
+        document.getElementById('m-method').innerText = r.method;
+        document.getElementById('edit-ings').value = r.ings;
+        document.getElementById('edit-method').value = r.method;
+        document.getElementById('m-speak-btn').onclick = () => speak(`${r.name}. ${r.ings}`);
+        document.getElementById('m-save-btn').onclick = () => saveEdit();
+        document.getElementById('m-edit-btn').onclick = () => toggleEdit(true);
+        toggleEdit(false);
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function toggleEdit(isEditing) {
+        document.getElementById('m-display').style.display = isEditing ? 'none' : 'block';
+        document.getElementById('m-edit-form').style.display = isEditing ? 'block' : 'none';
+        document.getElementById('m-edit-btn').style.display = isEditing ? 'none' : 'block';
+    }
+
+    function saveEdit() {
+        overrides[currentEditingId] = { ings: document.getElementById('edit-ings').value, method: document.getElementById('edit-method').value };
+        localStorage.setItem('cocktail_overrides', JSON.stringify(overrides));
+        render();
+        openModal(getFinalRecipes().find(x => x.id === currentEditingId));
+    }
+
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    function speak(t) { synth.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'fr-FR'; synth.speak(u); }
+    function stopAudio() { synth.cancel(); }
+
+    function generateQuiz() {
+        const r = getFinalRecipes()[Math.floor(Math.random() * baseRecipes.length)];
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('quiz-area').innerHTML = `<div style="font-size:40px;">${r.glass}</div><div style="font-size:22px;font-weight:bold;color:var(--gold);">${r.name}</div><div class="quiz-hidden" style="background:#222;padding:10px;margin:10px;border-radius:8px;cursor:pointer;color:#888;" onclick="this.innerText='${r.ings}'; checkQuiz()">INGRÉDIENTS ?</div><div class="quiz-hidden" style="background:#222;padding:10px;margin:10px;border-radius:8px;cursor:pointer;color:#888;" onclick="this.innerText='${r.method}'; checkQuiz()">MÉTHODE ?</div>`;
+    }
+    function checkQuiz() { if(document.querySelectorAll('.quiz-hidden[style*="color: rgb(136, 136, 136)"]').length === 0) document.getElementById('next-btn').style.display='block'; }
+
+    function startAudioReview() { 
+        let i=0; const rs=getFinalRecipes(); 
+        function n() { if(i<rs.length) { const u=new SpeechSynthesisUtterance(rs[i].name+". "+rs[i].ings); u.lang='fr-FR'; u.onend=()=>{i++; setTimeout(n,1000);}; synth.speak(u); } } 
+        n(); 
+    }
+
+    function switchView(viewId, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    render();
+</script>
+</body>
+</html>
