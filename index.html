@@ -73,4 +73,165 @@
     </div>
 
     <div id="view-audio" class="view" style="text-align:center; padding: 50px 20px;">
-        <span style="font-size:80px
+        <span style="font-size:80px;">🎧</span>
+        <button class="btn-gold" onclick="startAudioReview()">LANCER LA RÉVISION</button>
+        <button class="btn-gold" style="background:#444; color:white;" onclick="stopAudio()">STOP</button>
+    </div>
+
+    <div id="view-add" class="view">
+        <h2 style="color:var(--gold); text-align:center;">Nouveau Cocktail</h2>
+        <input type="text" id="add-name" placeholder="Nom du cocktail">
+        <textarea id="add-ings" placeholder="Ingrédients" rows="3"></textarea>
+        <textarea id="add-method" placeholder="Méthode" rows="3"></textarea>
+        <button class="btn-gold" onclick="addNewCocktail()">ENREGISTRER</button>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="switchView('view-list', this)"><span>📖</span>Carte</div>
+    <div class="nav-item" onclick="switchView('view-quiz', this)"><span>🧠</span>Quiz</div>
+    <div class="nav-item" onclick="switchView('view-audio', this)"><span>🎧</span>Audio</div>
+    <div class="nav-item" onclick="switchView('view-add', this)"><span>➕</span>Ajout</div>
+</div>
+
+<script>
+    const synth = window.speechSynthesis;
+    let overrides = JSON.parse(localStorage.getItem('cocktail_overrides')) || {};
+    let customList = JSON.parse(localStorage.getItem('custom_cocktails')) || [];
+    
+    const baseRecipes = [
+        { id: 'ama', name: "Amaretto Sour", glass: "🥃", color: "#a1887f", ings: "1oz Amaretto, 1oz Bourbon, 1oz Citron vert, 0.5oz Sucre, Blanc d'oeuf", method: "Dry shake puis shake avec glace." },
+        { id: 'blo', name: "Bloody Mary", glass: "🥤", color: "#d32f2f", ings: "1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron vert, Tabasco, Worcestershire, Sel de céleri, Poivre", method: "Rolling doux. Céleri et citron." },
+        { id: 'moj', name: "Mojito", glass: "🥤", color: "#4caf50", ings: "2oz Rhum blanc, 1oz Citron vert, Menthe, 0.5oz Sucre, Soda", method: "Piler menthe/citron." },
+        { id: 'spr', name: "Aperol Spritz", glass: "🍹", color: "#ff5722", ings: "3oz Prosecco, 2oz Aperol, 1oz Soda", method: "Glace, orange et olive." },
+        { id: 'mar', name: "Margarita", glass: "🍸", color: "#c0ca33", ings: "1.5oz Tequila, 1oz Triple Sec, 0.75oz Citron vert", method: "Bord salé." },
+        { id: 'cos', name: "Cosmopolitan", glass: "🍸", color: "#f06292", ings: "1oz Vodka, 0.5oz Triple Sec, 0.5oz Lime, 1oz Cranberry", method: "Shaker." },
+        { id: 'dai', name: "Daiquiri", glass: "🍸", color: "#f1f8e9", ings: "2oz Rhum Blanc, 1oz Citron vert, 0.75oz Sucre", method: "Shaker intense." },
+        { id: 'fre', name: "French Martini", glass: "🍸", color: "#9c27b0", ings: "1.5oz Vodka, 0.5oz Chambord, 2oz Jus d'ananas", method: "Shaker mousseux." },
+        { id: 'lit', name: "Long Island", glass: "🥤", color: "#795548", ings: "0.5oz Vodka, Gin, Rhum, Tequila, Triple Sec, Citron, Cola", method: "Sur glace." },
+        { id: 'por', name: "Pornstar Martini", glass: "🍸", color: "#ff9800", ings: "1.5oz Vodka, 1oz Passion, 0.5oz Lime, 0.5oz Sirop de Vanille, Prosecco side", method: "Shaker fort." },
+        { id: 'lyc', name: "Lychee Martini", glass: "🍸", color: "#f8bbd0", ings: "1.5oz Vodka, 1oz Liqueur Litchi, 0.5oz Vermouth", method: "Shaker." },
+        { id: 'pin', name: "Pina Colada", glass: "🍹", color: "#fff9c4", ings: "2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", method: "Shaker/Blender." },
+        { id: 'neg', name: "Negroni", glass: "🥃", color: "#e74c3c", ings: "1oz Gin, 1oz Campari, 1oz Vermouth Rouge", method: "Cuillère." },
+        { id: 'esp', name: "Espresso Martini", glass: "🍸", color: "#3e2723", ings: "1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", method: "Shaker fort." },
+        { id: 'ruby', name: "The Ruby", glass: "🍸", color: "#ff4081", ings: "1.5oz Gin Hendrick's, Rhubarbe, Framboise, Vanille", method: "Signature." },
+        { id: 'trop', name: "Tropico Spritz", glass: "🍹", color: "#ffab40", ings: "1oz Vodka, Pêche, Passion, Mangue, Prosecco", method: "Glace." },
+        { id: 'spic', name: "Spicy Margarita", glass: "🥃", color: "#fb8c00", ings: "2oz Tequila, Pastèque, Citron vert, Piment", method: "Bord pimenté." },
+        { id: 'tom', name: "Tommy's Margo", glass: "🥃", color: "#ffd54f", ings: "2oz Tequila, 1oz Lime, 0.5oz Agave", method: "Shaker." },
+        { id: 'limo', name: "Limoncello Spritz", glass: "🍹", color: "#ffeb3b", ings: "2oz Limoncello, 3oz Prosecco, Soda, Romarin", method: "Verre à vin." }
+    ];
+
+    function getFinal() { 
+        let all = [...baseRecipes, ...customList];
+        return all.map(r => overrides[r.id] ? {...r, ...overrides[r.id]} : r); 
+    }
+
+    function render() {
+        const q = document.getElementById('search-bar').value.toLowerCase();
+        const list = document.getElementById('cocktail-list');
+        list.innerHTML = "";
+        getFinal().sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
+            if(r.name.toLowerCase().includes(q)) {
+                const card = document.createElement('div');
+                card.className = 'cocktail-card';
+                card.onclick = () => openModal(r);
+                card.innerHTML = `<div class="card-img" style="background:linear-gradient(135deg,${r.color || '#333'},#000)">${r.glass || '🍸'}</div><div class="card-body"><div class="card-title">${r.name}</div><div class="card-subtitle">${r.ings}</div></div>`;
+                list.appendChild(card);
+            }
+        });
+    }
+
+    function addNewCocktail() {
+        const name = document.getElementById('add-name').value;
+        const ings = document.getElementById('add-ings').value;
+        const method = document.getElementById('add-method').value;
+        if(!name || !ings) return alert("Nom et Ingrédients requis !");
+        const newItem = { id: 'c'+Date.now(), name, ings, method, glass: '🍹', color: '#333' };
+        customList.push(newItem);
+        localStorage.setItem('custom_cocktails', JSON.stringify(customList));
+        document.getElementById('add-name').value = "";
+        document.getElementById('add-ings').value = "";
+        document.getElementById('add-method').value = "";
+        switchView('view-list', document.querySelector('.nav-item'));
+        render();
+    }
+
+    function startQuiz() {
+        const all = getFinal();
+        const r = all[Math.floor(Math.random() * all.length)];
+        const question = document.getElementById('quiz-question');
+        const optionsDiv = document.getElementById('quiz-options');
+        const nextBtn = document.getElementById('next-quiz');
+        nextBtn.style.display = 'none';
+        question.innerHTML = `<div style="font-size:40px;">${r.glass || '🍸'}</div><h2 style="color:var(--gold)">${r.name}</h2><p>Quels sont les ingrédients ?</p>`;
+        let options = [r.ings];
+        while(options.length < 4) {
+            let fake = all[Math.floor(Math.random() * all.length)].ings;
+            if(!options.includes(fake)) options.push(fake);
+        }
+        options.sort(() => Math.random() - 0.5);
+        optionsDiv.innerHTML = "";
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-qcm';
+            btn.innerText = opt;
+            btn.onclick = () => {
+                if(opt === r.ings) btn.classList.add('correct');
+                else {
+                    btn.classList.add('wrong');
+                    Array.from(optionsDiv.children).forEach(b => { if(b.innerText === r.ings) b.classList.add('correct'); });
+                }
+                Array.from(optionsDiv.children).forEach(b => b.disabled = true);
+                nextBtn.style.display = 'block';
+            };
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    let currentId = null;
+    function openModal(r) {
+        currentId = r.id;
+        document.getElementById('m-title').innerText = r.name;
+        document.getElementById('m-glass').innerText = r.glass || '🍸';
+        document.getElementById('m-ings').innerText = r.ings;
+        document.getElementById('m-method').innerText = r.method;
+        document.getElementById('edit-ings').value = r.ings;
+        document.getElementById('edit-method').value = r.method;
+        toggleEdit(false);
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function toggleEdit(e) {
+        document.getElementById('m-display').style.display = e ? 'none' : 'block';
+        document.getElementById('m-edit-form').style.display = e ? 'block' : 'none';
+    }
+
+    function saveEdit() {
+        overrides[currentId] = { ings: document.getElementById('edit-ings').value, method: document.getElementById('edit-method').value };
+        localStorage.setItem('cocktail_overrides', JSON.stringify(overrides));
+        render(); closeModal();
+    }
+
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    function speak(t) { synth.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'fr-FR'; synth.speak(u); }
+    function stopAudio() { synth.cancel(); }
+
+    function switchView(viewId, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        if(viewId === 'view-quiz') startQuiz();
+    }
+
+    function startAudioReview() { 
+        let i=0; const rs=getFinal(); 
+        function n() { if(i<rs.length) { const u=new SpeechSynthesisUtterance(rs[i].name+". "+rs[i].ings); u.lang='fr-FR'; u.onend=()=>{i++; setTimeout(n,1000);}; synth.speak(u); } } 
+        n(); 
+    }
+
+    render();
+    document.getElementById('m-speak-btn').onclick = () => speak(`${document.getElementById('m-title').innerText}. ${document.getElementById('m-ings').innerText}`);
+</script>
+</body>
+</html>
