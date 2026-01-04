@@ -3,79 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aussie Bar Master - Pro Fix</title>
+    <title>Aussie Bar Master - Full Edition</title>
     <style>
         :root { --gold: #d4af37; --bg: #0b0b0b; --card: #161616; --accent: #2a2a2a; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f0f0f0; padding: 10px; margin: 0; padding-bottom: 90px; }
         .container { max-width: 450px; margin: auto; }
         h1 { text-align: center; color: var(--gold); letter-spacing: 3px; font-size: 18px; text-transform: uppercase; margin: 20px 0; }
+        .unit-switch { position: sticky; top: 10px; z-index: 100; display: flex; justify-content: flex-end; margin-bottom: 10px; }
+        .btn-unit { background: var(--gold); color: black; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(22, 22, 22, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--accent); z-index: 1000; }
-        .nav-item { color: #555; cursor: pointer; font-size: 9px; text-align: center; flex: 1; transition: 0.3s; }
-        .nav-item.active { color: var(--gold); transform: translateY(-3px); }
+        .nav-item { color: #555; cursor: pointer; font-size: 9px; text-align: center; flex: 1; }
+        .nav-item.active { color: var(--gold); }
         .nav-item span { display: block; font-size: 20px; margin-bottom: 4px; }
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.4s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .cocktail-card { background: var(--card); border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--accent); display: flex; overflow: hidden; align-items: center; cursor: pointer; }
-        .card-img { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 30px; background: #222; border-right: 1px solid var(--accent); }
+        .card-img { width: 75px; height: 75px; display: flex; align-items: center; justify-content: center; font-size: 30px; background: #222; border-right: 1px solid var(--accent); }
         .card-body { padding: 12px; flex-grow: 1; min-width: 0; }
         .card-title { font-weight: bold; font-size: 15px; color: var(--gold); margin-bottom: 4px; }
-        .card-subtitle { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .std-badge { background: #444; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--gold); margin-left: 5px; }
+        .card-subtitle { font-size: 11px; color: #aaa; }
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--card); border: 2px solid var(--gold); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; position: relative; }
         .btn-gold { background: var(--gold); color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
-        input, textarea { background: #222; border: 1px solid var(--accent); color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; box-sizing: border-box; }
-        .btn-qcm { background: #222; color: white; border: 1px solid var(--accent); padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 8px; cursor: pointer; text-align: left; font-size: 13px; }
+        .btn-qcm { background: #222; color: white; border: 1px solid var(--accent); padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 8px; cursor: pointer; text-align: left; font-size: 12px; }
         .btn-qcm.correct { background: var(--green); }
         .btn-qcm.wrong { background: var(--red); }
+        input, textarea { background: #222; border: 1px solid var(--accent); color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; box-sizing: border-box; }
+        .edit-pencil { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gold); }
     </style>
 </head>
 <body>
 
 <div id="modal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <div id="m-glass" style="font-size:50px;"></div>
-        <h2 id="m-title" style="color:var(--gold); margin-top:0;"></h2>
-        <div id="m-std"></div>
-        <div style="text-align: left; font-size: 14px; margin-top:15px;">
-            <p><b>Ingrédients :</b><br><span id="m-ings" style="color:#ddd;"></span></p>
-            <p><b>Méthode :</b><br><span id="m-method" style="color:#bbb;"></span></p>
+        <button class="edit-pencil" id="pencil-btn">✏️</button>
+        <div id="m-view">
+            <div id="m-glass" style="font-size:50px;"></div>
+            <h2 id="m-title" style="color:var(--gold); margin-top:0;"></h2>
+            <div style="text-align: left; font-size: 14px; margin-top:15px;">
+                <p><b>Ingrédients :</b><br><span id="m-ings" style="color:#ddd;"></span></p>
+                <p><b>Méthode :</b><br><span id="m-method" style="color:#bbb;"></span></p>
+            </div>
+            <button class="btn-gold" style="background:#444; color:white;" onclick="closeModal()">FERMER</button>
         </div>
-        <button class="btn-gold" style="background:#444; color:white;" onclick="closeModal()">FERMER</button>
+        <div id="m-edit" style="display:none; text-align: left;">
+            <h3 style="color:var(--gold);">Modifier</h3>
+            <textarea id="edit-ings" rows="5"></textarea>
+            <textarea id="edit-meth" rows="4"></textarea>
+            <button class="btn-gold" onclick="saveEdit()">SAUVEGARDER</button>
+            <button class="btn-gold" style="background:#444; color:white;" onclick="showEdit(false)">ANNULER</button>
+        </div>
     </div>
 </div>
 
 <div class="container">
     <h1>🍸 Aussie Bar Master</h1>
-
     <div id="view-list" class="view active">
+        <div class="unit-switch"><button class="btn-unit" id="unit-toggle" onclick="toggleUnits()">MODE : OZ</button></div>
         <input type="text" id="search-bar" placeholder="Chercher un cocktail..." oninput="renderApp()">
         <div id="cocktail-list"></div>
     </div>
-
     <div id="view-quiz" class="view">
-        <div id="q-container" style="background:var(--card); padding:20px; border-radius:20px; border:1px solid var(--gold);">
+        <div id="q-box" style="background:var(--card); padding:20px; border-radius:20px; border:1px solid var(--gold);">
             <div id="q-text" style="text-align:center;"></div>
-            <div id="q-choices" style="margin-top:20px;"></div>
+            <div id="q-opts" style="margin-top:20px;"></div>
         </div>
-        <button id="q-next-btn" class="btn-gold" style="display:none;" onclick="initQuiz()">SUIVANT ➔</button>
+        <button id="q-next" class="btn-gold" style="display:none;" onclick="initQuiz()">SUIVANT ➔</button>
     </div>
-
     <div id="view-add" class="view">
         <h2 style="color:var(--gold); text-align:center;">Nouveau Cocktail</h2>
-        <input type="text" id="new-c-name" placeholder="Nom">
-        <textarea id="new-c-ings" placeholder="1.5oz Vodka, 0.5oz Lime..." rows="3"></textarea>
-        <textarea id="new-c-meth" placeholder="Méthode" rows="3"></textarea>
-        <button class="btn-gold" onclick="saveNewCocktail()">ENREGISTRER</button>
-    </div>
-
-    <div id="view-options" class="view">
-        <div style="background:var(--card); padding:20px; border-radius:15px; border:1px solid var(--accent);">
-            <h3 style="color:var(--gold); margin-top:0;">🛡️ Sauvegarde</h3>
-            <button class="btn-gold" onclick="exportData()">EXPORTER MES RECETTES</button>
-            <button class="btn-gold" style="background:#444; color:white;" onclick="importData()">IMPORTER</button>
-        </div>
+        <input type="text" id="add-n" placeholder="Nom">
+        <textarea id="add-i" placeholder="Ingrédients" rows="3"></textarea>
+        <textarea id="add-m" placeholder="Méthode" rows="3"></textarea>
+        <button class="btn-gold" onclick="addCocktail()">ENREGISTRER</button>
     </div>
 </div>
 
@@ -83,110 +84,112 @@
     <div class="nav-item active" onclick="switchTab('view-list', this)"><span>📖</span>Carte</div>
     <div class="nav-item" onclick="switchTab('view-quiz', this)"><span>🧠</span>Quiz</div>
     <div class="nav-item" onclick="switchTab('view-add', this)"><span>➕</span>Ajout</div>
-    <div class="nav-item" onclick="switchTab('view-options', this)"><span>⚙️</span>Options</div>
 </div>
 
 <script>
-    const recipesBase = [
-        { id: 'blo', name: "Bloody Mary", glass: "🥤", color: "#d32f2f", ings: "1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron vert, Tabasco, Worcestershire", method: "Rolling doux." },
-        { id: 'por', name: "Pornstar Martini", glass: "🍸", color: "#ff9800", ings: "1.5oz Vodka, 1oz Passion, 0.5oz Lime, 0.5oz Sirop de Vanille, Prosecco side", method: "Shaker fort." },
-        { id: 'ama', name: "Amaretto Sour", glass: "🥃", color: "#a1887f", ings: "1oz Amaretto, 1oz Bourbon, 1oz Citron vert, 0.5oz Sucre", method: "Dry shake." },
-        { id: 'moj', name: "Mojito", glass: "🥤", color: "#4caf50", ings: "2oz Rhum blanc, 1oz Citron vert, Menthe, 0.5oz Sucre", method: "Piler." },
+    let unit = 'oz';
+    const base = [
+        { id: 'moj', name: "Mojito", glass: "🥤", color: "#4caf50", ings: "2oz Rhum blanc, 1oz Citron vert, Menthe, 0.5oz Sucre, Soda", method: "Piler menthe/citron." },
+        { id: 'mar', name: "Margarita", glass: "🍸", color: "#c0ca33", ings: "1.5oz Tequila, 1oz Triple Sec, 0.75oz Citron vert", method: "Shaker. Bord salé." },
+        { id: 'neg', name: "Negroni", glass: "🥃", color: "#e74c3c", ings: "1oz Gin, 1oz Campari, 1oz Vermouth Rouge", method: "Cuillère." },
         { id: 'esp', name: "Espresso Martini", glass: "🍸", color: "#3e2723", ings: "1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", method: "Shaker fort." },
-        { id: 'neg', name: "Negroni", glass: "🥃", color: "#e74c3c", ings: "1oz Gin, 1oz Campari, 1oz Vermouth Rouge", method: "Cuillère." }
+        { id: 'cos', name: "Cosmopolitan", glass: "🍸", color: "#f06292", ings: "1oz Vodka, 0.5oz Triple Sec, 0.5oz Lime, 1oz Cranberry", method: "Shaker." },
+        { id: 'dai', name: "Daiquiri", glass: "🍸", color: "#f1f8e9", ings: "2oz Rhum Blanc, 1oz Citron vert, 0.75oz Sucre", method: "Shaker." },
+        { id: 'blo', name: "Bloody Mary", glass: "🥤", color: "#d32f2f", ings: "1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron, Tabasco, Worcestershire, Sel céleri, Poivre", method: "Rolling." },
+        { id: 'pin', name: "Pina Colada", glass: "🍹", color: "#fff9c4", ings: "2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", method: "Shaker." },
+        { id: 'lit', name: "Long Island", glass: "🥤", color: "#795548", ings: "0.5oz Vodka, Gin, Rhum, Tequila, Triple Sec, Citron, Cola", method: "Sur glace." },
+        { id: 'fre', name: "French Martini", glass: "🍸", color: "#9c27b0", ings: "1.5oz Vodka, 0.5oz Chambord, 2oz Jus d'ananas", method: "Shaker." },
+        { id: 'lyc', name: "Lychee Martini", glass: "🍸", color: "#f8bbd0", ings: "1.5oz Vodka, 1oz Liqueur Litchi, 0.5oz Vermouth", method: "Shaker." },
+        { id: 'por', name: "Pornstar Martini", glass: "🍸", color: "#ff9800", ings: "1.5oz Vodka, 1oz Passion, 0.5oz Lime, 0.5oz Sirop de Vanille, Prosecco side", method: "Shaker fort." },
+        { id: 'spr', name: "Aperol Spritz", glass: "🍹", color: "#ff5722", ings: "3oz Prosecco, 2oz Aperol, 1oz Soda", method: "Verre à vin." },
+        { id: 'lim', name: "Limoncello Spritz", glass: "🍹", color: "#ffeb3b", ings: "2oz Limoncello, 3oz Prosecco, Soda, Romarin", method: "Glace." },
+        { id: 'rub', name: "The Ruby", glass: "🍸", color: "#ff4081", ings: "1.5oz Gin, Rhubarbe, Framboise, Vanille", method: "Signature." },
+        { id: 'tro', name: "Tropico Spritz", glass: "🍹", color: "#ffab40", ings: "1oz Vodka, Pêche, Passion, Mangue, Prosecco", method: "Glace." },
+        { id: 'spm', name: "Spicy Margarita", glass: "🥃", color: "#fb8c00", ings: "2oz Tequila, Pastèque, Citron vert, Piment", method: "Bord pimenté." },
+        { id: 'tom', name: "Tommy's Margo", glass: "🥃", color: "#ffd54f", ings: "2oz Tequila, 1oz Lime, 0.5oz Agave", method: "Shaker." },
+        { id: 'ama', name: "Amaretto Sour", glass: "🥃", color: "#a1887f", ings: "1oz Amaretto, 1oz Bourbon, 1oz Citron vert, 0.5oz Sucre, Blanc d'oeuf", method: "Dry shake." }
     ];
 
-    let customItems = JSON.parse(localStorage.getItem('custom_items')) || [];
+    let custom = JSON.parse(localStorage.getItem('custom_c')) || [];
+    let edits = JSON.parse(localStorage.getItem('edits_c')) || {};
 
-    function calculateStandardDrinks(ings) {
-        let totalOz = 0;
-        const matches = ings.match(/(\d+(\.\d+)?)\s*(oz|ml)/gi);
-        if (!matches) return null;
-        matches.forEach(m => {
-            const val = parseFloat(m);
-            const unit = m.toLowerCase().includes('oz') ? 1 : 1/30;
-            if (val * unit <= 2) totalOz += val * unit;
-        });
-        return (totalOz).toFixed(1);
+    function getFinal() {
+        let all = [...base, ...custom];
+        return all.map(r => edits[r.id] ? {...r, ...edits[r.id]} : r);
+    }
+
+    function conv(t) {
+        if (unit === 'oz') return t;
+        return t.replace(/(\d+(\.\d+)?)\s*oz/gi, (m, p1) => (parseFloat(p1) * 30).toFixed(0) + "ml");
     }
 
     function renderApp() {
-        const query = document.getElementById('search-bar').value.toLowerCase();
+        const q = document.getElementById('search-bar').value.toLowerCase();
         const list = document.getElementById('cocktail-list');
         list.innerHTML = "";
-        const all = [...recipesBase, ...customItems];
-        all.sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
-            if(r.name.toLowerCase().includes(query)) {
-                const std = calculateStandardDrinks(r.ings);
-                const card = document.createElement('div');
-                card.className = 'cocktail-card';
-                card.onclick = () => openC(r);
-                card.innerHTML = `<div class="card-img" style="background:linear-gradient(135deg,${r.color||'#333'},#000)">${r.glass||'🍸'}</div><div class="card-body"><div class="card-title">${r.name} <span class="std-badge">${std} STD</span></div><div class="card-subtitle">${r.ings}</div></div>`;
-                list.appendChild(card);
+        getFinal().sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
+            if(r.name.toLowerCase().includes(q)) {
+                list.innerHTML += `<div class="cocktail-card" onclick="openM('${r.id}')"><div class="card-img" style="background:linear-gradient(135deg,${r.color},#000)">${r.glass}</div><div class="card-body"><div class="card-title">${r.name}</div><div class="card-subtitle">${conv(r.ings)}</div></div></div>`;
             }
         });
     }
 
-    function initQuiz() {
-        const all = [...recipesBase, ...customItems];
-        const r = all[Math.floor(Math.random() * all.length)];
-        const qChoices = document.getElementById('q-choices');
-        document.getElementById('q-next-btn').style.display = 'none';
-        document.getElementById('q-text').innerHTML = `<h2>${r.name}</h2><p>Ingrédients ?</p>`;
-        let opts = [r.ings];
-        while(opts.length < 4) {
-            let f = all[Math.floor(Math.random() * all.length)].ings;
-            if(!opts.includes(f)) opts.push(f);
+    let currId = null;
+    function openM(id) {
+        currId = id; const r = getFinal().find(x => x.id === id);
+        document.getElementById('m-title').innerText = r.name;
+        document.getElementById('m-glass').innerText = r.glass;
+        document.getElementById('m-ings').innerText = conv(r.ings);
+        document.getElementById('m-method').innerText = r.method;
+        document.getElementById('edit-ings').value = r.ings;
+        document.getElementById('edit-meth').value = r.method;
+        showEdit(false); document.getElementById('modal').style.display = 'flex';
+    }
+
+    function showEdit(v) {
+        document.getElementById('m-view').style.display = v ? 'none' : 'block';
+        document.getElementById('m-edit').style.display = v ? 'block' : 'none';
+    }
+
+    function saveEdit() {
+        edits[currId] = { ings: document.getElementById('edit-ings').value, method: document.getElementById('edit-meth').value };
+        localStorage.setItem('edits_c', JSON.stringify(edits));
+        renderApp(); closeModal();
+    }
+
+    function addCocktail() {
+        const n = document.getElementById('add-n').value;
+        const i = document.getElementById('add-i').value;
+        if(n && i) {
+            custom.push({ id: 'c'+Date.now(), name: n, ings: i, method: document.getElementById('add-m').value, glass: '🍸', color: '#333' });
+            localStorage.setItem('custom_c', JSON.stringify(custom));
+            document.getElementById('add-n').value = ""; renderApp(); switchTab('view-list', document.querySelector('.nav-item'));
         }
+    }
+
+    function initQuiz() {
+        const all = getFinal(); const r = all[Math.floor(Math.random() * all.length)];
+        document.getElementById('q-next').style.display = 'none';
+        document.getElementById('q-text').innerHTML = `<h2>${r.name}</h2><p>Ingrédients ?</p>`;
+        let opts = [r.ings]; while(opts.length < 4) { let f = all[Math.floor(Math.random() * all.length)].ings; if(!opts.includes(f)) opts.push(f); }
         opts.sort(() => Math.random() - 0.5);
-        qChoices.innerHTML = "";
+        document.getElementById('q-opts').innerHTML = "";
         opts.forEach(o => {
-            const b = document.createElement('button');
-            b.className = 'btn-qcm';
-            b.innerText = o;
-            b.onclick = () => {
-                if(o === r.ings) b.classList.add('correct');
-                else b.classList.add('wrong');
-                document.getElementById('q-next-btn').style.display = 'block';
-            };
-            qChoices.appendChild(b);
+            const b = document.createElement('button'); b.className = 'btn-qcm'; b.innerText = conv(o);
+            b.onclick = () => { if(o === r.ings) b.classList.add('correct'); else b.classList.add('wrong'); document.getElementById('q-next').style.display = 'block'; };
+            document.getElementById('q-opts').appendChild(b);
         });
     }
 
-    function openC(r) {
-        document.getElementById('m-title').innerText = r.name;
-        document.getElementById('m-glass').innerText = r.glass || '🍸';
-        document.getElementById('m-ings').innerText = r.ings;
-        document.getElementById('m-method').innerText = r.method;
-        document.getElementById('modal').style.display = 'flex';
-    }
-
-    function saveNewCocktail() {
-        const n = document.getElementById('new-c-name').value;
-        const i = document.getElementById('new-c-ings').value;
-        const m = document.getElementById('new-c-meth').value;
-        if(n && i) {
-            customItems.push({ id: 'c'+Date.now(), name: n, ings: i, method: m });
-            localStorage.setItem('custom_items', JSON.stringify(customItems));
-            renderApp(); switchTab('view-list', document.querySelector('.nav-item'));
-        }
-    }
-
-    function exportData() { prompt("Code de sauvegarde :", btoa(JSON.stringify(customItems))); }
-    function importData() {
-        const code = prompt("Colle ton code :");
-        if(code) { customItems = JSON.parse(atob(code)); localStorage.setItem('custom_items', JSON.stringify(customItems)); renderApp(); }
-    }
-
+    function toggleUnits() { unit = (unit === 'oz' ? 'ml' : 'oz'); document.getElementById('unit-toggle').innerText = "MODE : " + unit.toUpperCase(); renderApp(); }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
     function switchTab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        if(id === 'view-quiz') initQuiz();
+        el.classList.add('active'); if(id === 'view-quiz') initQuiz();
     }
-
+    document.getElementById('pencil-btn').onclick = () => showEdit(true);
     window.onload = renderApp;
 </script>
 </body>
