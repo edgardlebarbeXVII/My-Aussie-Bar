@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Aussie Bar Master - Final Edition</title>
+    <title>Aussie Bar Master - Preview Fix</title>
     <style>
         :root { --gold: #d4af37; --bg: #0b0b0b; --card: #161616; --accent: #2a2a2a; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f0f0f0; padding: 10px; margin: 0; padding-bottom: 80px; }
         
-        /* Filtres */
-        .base-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .base-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
         .filter-btn { background: var(--card); border: 1px solid var(--accent); color: #aaa; padding: 8px 15px; border-radius: 20px; font-size: 11px; white-space: nowrap; cursor: pointer; }
         .filter-btn.active { background: var(--gold); color: black; font-weight: bold; }
 
-        /* Cartes avec Aperçu */
-        .cocktail-card { background: var(--card); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--accent); display: flex; align-items: stretch; cursor: pointer; }
-        .card-img { width: 60px; display: flex; align-items: center; justify-content: center; font-size: 25px; background: #222; border-radius: 12px 0 0 12px; border-right: 1px solid var(--accent); }
-        .card-body { padding: 10px; flex-grow: 1; min-width: 0; }
-        .card-title { font-weight: bold; color: var(--gold); font-size: 15px; margin-bottom: 4px; }
-        .card-preview { font-size: 11px; color: #ddd; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .card-garnish { font-size: 10px; color: var(--green); margin-top: 4px; font-weight: bold; }
+        /* CARTES AMÉLIORÉES POUR L'APERÇU */
+        .cocktail-card { background: var(--card); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--accent); display: flex; align-items: stretch; cursor: pointer; min-height: 80px; }
+        .card-img { width: 65px; display: flex; align-items: center; justify-content: center; font-size: 30px; background: #222; border-radius: 12px 0 0 12px; border-right: 1px solid var(--accent); }
+        .card-body { padding: 12px; flex-grow: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+        .card-title { font-weight: bold; color: var(--gold); font-size: 16px; margin-bottom: 4px; text-transform: uppercase; }
+        
+        /* L'APERÇU BIEN VISIBLE ICI */
+        .card-preview { font-size: 12px; color: #ffffff; line-height: 1.3; margin-bottom: 4px; font-weight: 400; display: block !important; }
+        .card-garnish { font-size: 10px; color: var(--green); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Modal Toolbar */
+        /* Modal Toolbar Fixe */
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; flex-direction: column; }
         .modal-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1a1a1a; border-bottom: 2px solid var(--gold); position: sticky; top: 0; }
         .modal-scroll-area { flex-grow: 1; overflow-y: auto; padding: 20px; }
-        .panic-ings { font-size: 26px; line-height: 1.4; color: #fff; background: #111; padding: 15px; border-radius: 10px; font-weight: bold; white-space: pre-line; border-left: 5px solid var(--gold); }
+        .panic-ings { font-size: 28px; line-height: 1.4; color: #fff; background: #111; padding: 20px; border-radius: 10px; font-weight: bold; white-space: pre-line; border-left: 5px solid var(--gold); }
         
         /* Nav Bas */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #111; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid var(--accent); }
@@ -55,7 +56,7 @@
             <div id="m-ings" class="panic-ings"></div>
             <div style="margin-top:20px; border-top: 1px solid var(--accent); padding-top: 15px;">
                 <p><b>✨ GARNITURE :</b> <br><span id="m-garnish" style="color:var(--green); font-size:18px;"></span></p>
-                <p><b>⚙️ MÉTHODE :</b> <br><span id="m-meth" style="color:#aaa;"></span></p>
+                <p><b>⚙️ MÉTHODE :</b> <br><span id="m-meth" style="color:#aaa; font-size:16px;"></span></p>
             </div>
         </div>
         <div id="m-edit-div" style="display:none;">
@@ -107,26 +108,26 @@
         { id:'b1', name:"Mojito", bases:["Rhum"], glass:"🥤", ings:"2oz Rhum blanc, 1oz Lime, 0.5oz Sucre, Menthe, Soda", garnish:"Bouquet menthe", method:"Build & Muddle" },
         { id:'b2', name:"Margarita", bases:["Tequila"], glass:"🍸", ings:"1.5oz Tequila, 1oz Triple Sec, 0.75oz Lime", garnish:"Sel & Lime", method:"Shake & Strain" },
         { id:'b3', name:"Negroni", bases:["Gin"], glass:"🥃", ings:"1oz Gin, 1oz Campari, 1oz Vermouth Rouge", garnish:"Zeste orange", method:"Stir" },
-        { id:'b4', name:"Espresso Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", garnish:"3 grains café", method:"Shake" },
+        { id:'b4', name:"Espresso Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", garnish:"3 grains café", method:"Hard Shake" },
         { id:'b5', name:"Pornstar Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka, 1oz Passion, 0.5oz Lime, 0.5oz Vanille", garnish:"Demi passion", method:"Shake" },
         { id:'b6', name:"Amaretto Sour", bases:["Bourbon"], glass:"🥃", ings:"1oz Amaretto, 1oz Bourbon, 1oz Lime, 0.5oz Sucre", garnish:"Cerise & Orange", method:"Dry Shake" },
         { id:'b7', name:"Bloody Mary", bases:["Vodka"], glass:"🥤", ings:"1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron, Tabasco", garnish:"Céleri & Citron", method:"Rolling" },
         { id:'b8', name:"Cosmopolitan", bases:["Vodka"], glass:"🍸", ings:"1oz Vodka, 0.5oz Triple Sec, 0.5oz Lime, 1oz Cranberry", garnish:"Zeste orange", method:"Shake" },
         { id:'b9', name:"Daiquiri", bases:["Rhum"], glass:"🍸", ings:"2oz Rhum Blanc, 1oz Lime, 0.75oz Sucre", garnish:"Lime", method:"Shake" },
         { id:'b10', name:"Pina Colada", bases:["Rhum"], glass:"🍹", ings:"2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", garnish:"Ananas", method:"Shake" },
-        { id:'b11', name:"Long Island", bases:["Vodka","Gin","Rhum","Tequila"], glass:"🥤", ings:"0.5oz de chaque alcool, Lime, Cola", garnish:"Citron", method:"Build" },
+        { id:'b11', name:"Long Island", bases:["Vodka","Gin","Rhum","Tequila"], glass:"🥤", ings:"0.5oz de chaque, Lime, Cola", garnish:"Citron", method:"Build" },
         { id:'b12', name:"French Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka, 0.5oz Chambord, 2oz Jus d'ananas", garnish:"Framboise", method:"Shake" },
         { id:'b13', name:"Lychee Martini", bases:["Vodka"], glass:"🍸", ings:"1.5oz Vodka, 1oz Liqueur Litchi, 0.5oz Vermouth", garnish:"Litchis", method:"Shake" },
-        { id:'b14', name:"Aperol Spritz", bases:["Wine"], glass:"🍹", ings:"3oz Prosecco, 2oz Aperol, 1oz Soda", garnish:"Orange", method:"Build" },
-        { id:'b15', name:"Limoncello Spritz", bases:["Wine"], glass:"🍹", ings:"2oz Limoncello, 3oz Prosecco, Soda", garnish:"Citron", method:"Build" },
+        { id:'b14', name:"Aperol Spritz", bases:["Wine"], glass:"🍹", ings:"3oz Prosecco, 2oz Aperol, 1oz Soda", garnish:"Orange & Olive", method:"Build" },
+        { id:'b15', name:"Limoncello Spritz", bases:["Wine"], glass:"🍹", ings:"2oz Limoncello, 3oz Prosecco, Soda", garnish:"Citron & Romarin", method:"Build" },
         { id:'b16', name:"The Ruby", bases:["Gin"], glass:"🍸", ings:"1.5oz Gin, Rhubarbe, Framboise, Vanille", garnish:"Framboise", method:"Shake" },
         { id:'b17', name:"Tropico Spritz", bases:["Vodka"], glass:"🍹", ings:"1oz Vodka, Pêche, Passion, Mangue, Prosecco", garnish:"Passion", method:"Build" },
         { id:'b18', name:"Spicy Margarita", bases:["Tequila"], glass:"🥃", ings:"2oz Tequila, Pastèque, Lime, Piment", garnish:"Bord pimenté", method:"Shake" },
         { id:'b19', name:"Tommy's Margo", bases:["Tequila"], glass:"🥃", ings:"2oz Tequila, 1oz Lime, 0.5oz Agave", garnish:"Lime", method:"Shake" }
     ];
 
-    let customs = JSON.parse(localStorage.getItem('bar_v_FINAL_list')) || [];
-    let edits = JSON.parse(localStorage.getItem('bar_v_FINAL_edits')) || {};
+    let customs = JSON.parse(localStorage.getItem('bar_vF_final_list')) || [];
+    let edits = JSON.parse(localStorage.getItem('bar_vF_final_edits')) || {};
     let curId = null; let curBase = 'ALL';
 
     function getFinal() { return [...baseRecipes, ...customs].map(r => edits[r.id] ? {...r, ...edits[r.id]} : r); }
@@ -136,12 +137,13 @@
         const container = document.getElementById('list'); container.innerHTML = "";
         getFinal().filter(r => curBase === 'ALL' || r.bases.includes(curBase)).sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
             if(r.name.toLowerCase().includes(q)) {
+                // Ici, on s'assure que card-preview affiche bien les ingrédients
                 container.innerHTML += `
                     <div class="cocktail-card" onclick="openModal('${r.id}')">
                         <div class="card-img">${r.glass||'🍸'}</div>
                         <div class="card-body">
                             <div class="card-title">${r.name}</div>
-                            <div class="card-preview">${r.ings.substring(0, 45)}...</div>
+                            <div class="card-preview">${r.ings.replace(/\n/g, ', ')}</div>
                             <div class="card-garnish">✨ ${r.garnish}</div>
                         </div>
                     </div>`;
@@ -157,7 +159,7 @@
         document.getElementById('m-meth').innerText = r.method;
         toggleEditMode(false);
         document.getElementById('m-del-icon').style.visibility = id.startsWith('c') ? 'visible' : 'hidden';
-        document.getElementById('m-del-icon').onclick = () => { if(confirm('Supprimer ?')) { customs = customs.filter(x => x.id !== id); localStorage.setItem('bar_v_FINAL_list', JSON.stringify(customs)); render(); closeModal(); } };
+        document.getElementById('m-del-icon').onclick = () => { if(confirm('Supprimer ?')) { customs = customs.filter(x => x.id !== id); localStorage.setItem('bar_vF_final_list', JSON.stringify(customs)); render(); closeModal(); } };
         document.getElementById('m-edit-icon').onclick = () => toggleEditMode(true, r);
         document.getElementById('modal').style.display = 'flex';
     }
@@ -174,7 +176,7 @@
 
     function saveEdits() {
         edits[curId] = { ings: document.getElementById('edit-ings-val').value, garnish: document.getElementById('edit-garnish-val').value, method: document.getElementById('edit-meth-val').value };
-        localStorage.setItem('bar_v_FINAL_edits', JSON.stringify(edits));
+        localStorage.setItem('bar_vF_final_edits', JSON.stringify(edits));
         render(); closeModal();
     }
 
@@ -183,19 +185,16 @@
         const b = Array.from(document.querySelectorAll('#add-base-selection input:checked')).map(i => i.value);
         if(n && b.length > 0) {
             customs.push({ id:'c'+Date.now(), name:n, bases:b, ings:document.getElementById('add-ings').value, garnish:document.getElementById('add-garnish').value, method:document.getElementById('add-meth').value, glass:'🍸' });
-            localStorage.setItem('bar_v_FINAL_list', JSON.stringify(customs));
+            localStorage.setItem('bar_vF_final_list', JSON.stringify(customs));
             render(); tab('view-list', document.querySelector('.nav-item'));
-        } else { alert("Nom et Base requis !"); }
+        }
     }
 
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
     function setF(b, el) { curBase = b; document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); el.classList.add('active'); render(); }
-    
-    function tab(id, el) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
+    function tab(id, el) { 
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); 
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active');
         if(id === 'view-add') { document.getElementById('add-base-selection').innerHTML = spirits.map(s => `<div style="display:flex;align-items:center;gap:5px;font-size:12px;"><input type="checkbox" value="${s}"> ${s}</div>`).join(''); }
         if(id === 'view-quiz') initQuiz();
     }
