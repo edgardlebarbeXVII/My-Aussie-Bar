@@ -3,43 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aussie Bar Master - Final</title>
+    <title>Aussie Bar Master - Pro RSA Edition</title>
     <style>
         :root { --gold: #d4af37; --bg: #0b0b0b; --card: #161616; --accent: #2a2a2a; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f0f0f0; padding: 10px; margin: 0; padding-bottom: 90px; }
         .container { max-width: 450px; margin: auto; }
         h1 { text-align: center; color: var(--gold); letter-spacing: 3px; font-size: 18px; text-transform: uppercase; margin: 20px 0; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(22, 22, 22, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--accent); z-index: 1000; }
-        .nav-item { color: #555; cursor: pointer; font-size: 10px; text-align: center; flex: 1; transition: 0.3s; }
+        .nav-item { color: #555; cursor: pointer; font-size: 9px; text-align: center; flex: 1; transition: 0.3s; }
         .nav-item.active { color: var(--gold); transform: translateY(-3px); }
-        .nav-item span { display: block; font-size: 22px; margin-bottom: 4px; }
-        .view { display: none; }
-        .view.active { display: block; animation: fadeIn 0.4s; }
+        .nav-item span { display: block; font-size: 20px; margin-bottom: 4px; }
+        .view { display: none; animation: fadeIn 0.4s; }
+        .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .cocktail-card { background: var(--card); border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--accent); display: flex; overflow: hidden; align-items: center; cursor: pointer; }
-        .card-img { width: 75px; height: 75px; display: flex; align-items: center; justify-content: center; font-size: 35px; background: #222; border-right: 1px solid var(--accent); }
+        .card-img { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 30px; background: #222; border-right: 1px solid var(--accent); }
         .card-body { padding: 12px; flex-grow: 1; min-width: 0; }
-        .card-title { font-weight: bold; font-size: 16px; color: var(--gold); margin-bottom: 4px; }
+        .card-title { font-weight: bold; font-size: 15px; color: var(--gold); margin-bottom: 4px; }
         .card-subtitle { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .std-badge { background: #444; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; border: 1px solid var(--gold); }
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--card); border: 2px solid var(--gold); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; position: relative; }
-        .btn-gold { background: var(--gold); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
-        .btn-qcm { background: #222; color: white; border: 1px solid var(--accent); padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 8px; cursor: pointer; text-align: left; font-size: 13px; }
-        .btn-qcm.correct { background: var(--green); color: white; }
-        .btn-qcm.wrong { background: var(--red); color: white; }
-        textarea, input { background: #222; border: 1px solid var(--accent); color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; }
-        .edit-pencil { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--gold); }
+        .btn-gold { background: var(--gold); color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; font-size: 14px; }
+        input, textarea, select { background: #222; border: 1px solid var(--accent); color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; }
+        .glass-picker { display: flex; justify-content: space-around; font-size: 24px; margin-bottom: 15px; background: #222; padding: 10px; border-radius: 8px; }
+        .glass-opt { cursor: pointer; opacity: 0.4; transition: 0.2s; }
+        .glass-opt.selected { opacity: 1; transform: scale(1.2); color: var(--gold); }
     </style>
 </head>
 <body>
 
 <div id="modal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <button class="edit-pencil" id="btn-edit-pencil">✏️</button>
+        <button style="position:absolute; top:15px; right:15px; background:none; border:none; font-size:24px; color:var(--gold);" id="btn-edit-pencil">✏️</button>
         <div id="modal-view">
             <div id="m-glass" style="font-size:50px;"></div>
             <h2 id="m-title" style="color:var(--gold); margin-top:0;"></h2>
-            <div style="text-align: left; margin-top: 15px; font-size: 14px; line-height: 1.5;">
+            <div id="m-std" style="margin-bottom:15px;"></div>
+            <div style="text-align: left; font-size: 14px;">
                 <p><b>Ingrédients :</b><br><span id="m-ings" style="color:#ddd;"></span></p>
                 <p><b>Méthode :</b><br><span id="m-method" style="color:#bbb;"></span></p>
             </div>
@@ -47,7 +48,7 @@
             <button class="btn-gold" style="background:#444; color:white;" onclick="closeModal()">FERMER</button>
         </div>
         <div id="modal-edit" style="display:none; text-align: left;">
-            <h3 style="color:var(--gold); margin-top:0;">Modifier</h3>
+            <h3 style="color:var(--gold);">Modifier</h3>
             <textarea id="edit-ings-text" rows="5"></textarea>
             <textarea id="edit-meth-text" rows="4"></textarea>
             <button class="btn-gold" onclick="confirmSave()">ENREGISTRER</button>
@@ -58,57 +59,82 @@
 
 <div class="container">
     <h1>🍸 Aussie Bar Master</h1>
+
     <div id="view-list" class="view active">
         <input type="text" id="search-bar" placeholder="Chercher un cocktail..." oninput="renderApp()">
         <div id="cocktail-list"></div>
     </div>
-    <div id="view-quiz" class="view">
-        <div id="q-container" style="background:var(--card); padding:20px; border-radius:20px; border:1px solid var(--gold);">
-            <div id="q-text" style="text-align:center;"></div>
-            <div id="q-choices" style="margin-top:20px;"></div>
-        </div>
-        <button id="q-next-btn" class="btn-gold" style="display:none; border-radius:30px;" onclick="initQuiz()">SUIVANT ➔</button>
-    </div>
-    <div id="view-audio" class="view" style="text-align:center; padding: 40px 20px;">
-        <span style="font-size:70px;">🎧</span>
-        <button class="btn-gold" onclick="playAllAudio()">LANCER LA RÉVISION</button>
-        <button class="btn-gold" style="background:#444; color:white;" onclick="window.speechSynthesis.cancel()">STOP</button>
-    </div>
+
     <div id="view-add" class="view">
         <h2 style="color:var(--gold); text-align:center;">Nouveau Cocktail</h2>
         <input type="text" id="new-c-name" placeholder="Nom du cocktail">
-        <textarea id="new-c-ings" placeholder="Ingrédients" rows="3"></textarea>
-        <textarea id="new-c-meth" placeholder="Méthode" rows="3"></textarea>
+        
+        <label style="font-size:12px; color:var(--gold);">Choisir le verre :</label>
+        <div class="glass-picker" id="new-glass-picker">
+            <span class="glass-opt selected" onclick="selectGlass(this, '🍸')">🍸</span>
+            <span class="glass-opt" onclick="selectGlass(this, '🥃')">🥃</span>
+            <span class="glass-opt" onclick="selectGlass(this, '🍹')">🍹</span>
+            <span class="glass-opt" onclick="selectGlass(this, '🥤')">🥤</span>
+            <span class="glass-opt" onclick="selectGlass(this, '🍷')">🍷</span>
+        </div>
+
+        <label style="font-size:12px; color:var(--gold);">Couleur de la carte :</label>
+        <input type="color" id="new-c-color" value="#d4af37" style="height:50px; padding:2px;">
+
+        <textarea id="new-c-ings" placeholder="Ingrédients (ex: 1.5oz Vodka, 0.5oz Sucre...)" rows="3"></textarea>
+        <textarea id="new-c-meth" placeholder="Méthode de préparation" rows="3"></textarea>
+        
+        <p style="font-size:11px; color:#888;">Note : L'appli calcule les 'Standard Drinks' en cherchant 'oz' ou 'ml' dans tes ingrédients.</p>
         <button class="btn-gold" onclick="saveNewCocktail()">ENREGISTRER</button>
+    </div>
+
+    <div id="view-options" class="view">
+        <div style="background:var(--card); padding:20px; border-radius:15px; border:1px solid var(--accent); margin-bottom:15px;">
+            <h3 style="color:var(--gold); margin-top:0;">🛡️ Sauvegarde</h3>
+            <button class="btn-gold" onclick="exportData()">EXPORTER MES RECETTES</button>
+            <button class="btn-gold" style="background:#444; color:white;" onclick="importData()">IMPORTER UNE SAUVEGARDE</button>
+        </div>
+        <div style="background:var(--card); padding:20px; border-radius:15px; border:1px solid var(--accent);">
+            <h3 style="color:var(--gold); margin-top:0;">📏 Unités</h3>
+            <p style="font-size:12px; color:#888;">1 oz = 30 ml (Standard Australie)</p>
+            <input type="number" id="conv-val" placeholder="Valeur en oz">
+            <button class="btn-gold" onclick="convertUnits()">CONVERTIR EN ML</button>
+            <p id="conv-res" style="text-align:center; color:var(--gold); font-weight:bold;"></p>
+        </div>
     </div>
 </div>
 
 <div class="bottom-nav">
     <div class="nav-item active" onclick="switchTab('view-list', this)"><span>📖</span>Carte</div>
-    <div class="nav-item" onclick="switchTab('view-quiz', this)"><span>🧠</span>Quiz</div>
-    <div class="nav-item" onclick="switchTab('view-audio', this)"><span>🎧</span>Audio</div>
     <div class="nav-item" onclick="switchTab('view-add', this)"><span>➕</span>Ajout</div>
+    <div class="nav-item" onclick="switchTab('view-options', this)"><span>⚙️</span>Options</div>
 </div>
 
 <script>
     const recipesBase = [
-        { id: 'blo', name: "Bloody Mary", glass: "🥤", color: "#d32f2f", ings: "1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron vert, Tabasco, Worcestershire, Sel de céleri, Poivre", method: "Rolling doux. Céleri et citron." },
+        { id: 'blo', name: "Bloody Mary", glass: "🥤", color: "#d32f2f", ings: "1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron vert, Tabasco, Worcestershire, Sel de céleri, Poivre", method: "Rolling doux." },
         { id: 'por', name: "Pornstar Martini", glass: "🍸", color: "#ff9800", ings: "1.5oz Vodka, 1oz Passion, 0.5oz Lime, 0.5oz Sirop de Vanille, Prosecco side", method: "Shaker fort." },
-        { id: 'ama', name: "Amaretto Sour", glass: "🥃", color: "#a1887f", ings: "1oz Amaretto, 1oz Bourbon, 1oz Citron vert, 0.5oz Sucre, Blanc d'oeuf", method: "Dry shake puis shake avec glace." },
-        { id: 'moj', name: "Mojito", glass: "🥤", color: "#4caf50", ings: "2oz Rhum blanc, 1oz Citron vert, Menthe, 0.5oz Sucre, Soda", method: "Piler menthe/citron." },
-        { id: 'spr', name: "Aperol Spritz", glass: "🍹", color: "#ff5722", ings: "3oz Prosecco, 2oz Aperol, 1oz Soda", method: "Glace, orange et olive." },
-        { id: 'mar', name: "Margarita", glass: "🍸", color: "#c0ca33", ings: "1.5oz Tequila, 1oz Triple Sec, 0.75oz Citron vert", method: "Bord salé." },
-        { id: 'cos', name: "Cosmopolitan", glass: "🍸", color: "#f06292", ings: "1oz Vodka, 0.5oz Triple Sec, 0.5oz Lime, 1oz Cranberry", method: "Shaker." },
-        { id: 'dai', name: "Daiquiri", glass: "🍸", color: "#f1f8e9", ings: "2oz Rhum Blanc, 1oz Citron vert, 0.75oz Sucre", method: "Shaker intense." },
+        { id: 'ama', name: "Amaretto Sour", glass: "🥃", color: "#a1887f", ings: "1oz Amaretto, 1oz Bourbon, 1oz Citron vert, 0.5oz Sucre, Blanc d'oeuf", method: "Dry shake." },
         { id: 'esp', name: "Espresso Martini", glass: "🍸", color: "#3e2723", ings: "1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", method: "Shaker fort." },
-        { id: 'ruby', name: "The Ruby", glass: "🍸", color: "#ff4081", ings: "1.5oz Gin Hendrick's, Rhubarbe, Framboise, Vanille", method: "Signature Mr Percival." },
-        { id: 'trop', name: "Tropico Spritz", glass: "🍹", color: "#ffab40", ings: "1oz Vodka, Pêche, Passion, Mangue, Prosecco", method: "Glace." },
-        { id: 'spic', name: "Spicy Margarita", glass: "🥃", color: "#fb8c00", ings: "2oz Tequila, Pastèque, Citron vert, Piment", method: "Bord pimenté." },
         { id: 'neg', name: "Negroni", glass: "🥃", color: "#e74c3c", ings: "1oz Gin, 1oz Campari, 1oz Vermouth Rouge", method: "Cuillère." }
     ];
 
     let customItems = JSON.parse(localStorage.getItem('custom_items')) || [];
     let overrides = JSON.parse(localStorage.getItem('cocktail_edits')) || {};
+    let selectedGlass = '🍸';
+
+    function calculateStandardDrinks(ings) {
+        let totalOz = 0;
+        const matches = ings.match(/(\d+(\.\d+)?)\s*(oz|ml)/gi);
+        if (!matches) return null;
+        matches.forEach(m => {
+            const val = parseFloat(m);
+            const unit = m.toLowerCase().includes('oz') ? 30 : 1;
+            // On estime que seuls les liquides < 2oz dans une recette sont de l'alcool pur pour le calcul simplifié
+            if (val * (unit === 30 ? 1 : 1/30) <= 2) totalOz += (val * unit) / 30;
+        });
+        return (totalOz * 1).toFixed(1); // 1 oz d'alcool fort à 40% = ~1 standard drink en Australie
+    }
 
     function getAppList() {
         let all = [...recipesBase, ...customItems];
@@ -121,20 +147,34 @@
         list.innerHTML = "";
         getAppList().sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
             if(r.name.toLowerCase().includes(query)) {
+                const std = calculateStandardDrinks(r.ings);
                 const card = document.createElement('div');
                 card.className = 'cocktail-card';
                 card.onclick = () => openC(r);
-                card.innerHTML = `<div class="card-img" style="background:linear-gradient(135deg,${r.color},#000)">${r.glass}</div><div class="card-body"><div class="card-title">${r.name}</div><div class="card-subtitle">${r.ings}</div></div>`;
+                card.innerHTML = `
+                    <div class="card-img" style="background:linear-gradient(135deg,${r.color||'#333'},#000)">${r.glass||'🍸'}</div>
+                    <div class="card-body">
+                        <div class="card-title">${r.name} ${std ? `<span class="std-badge">${std} STD</span>` : ''}</div>
+                        <div class="card-subtitle">${r.ings}</div>
+                    </div>`;
                 list.appendChild(card);
             }
         });
     }
 
+    function selectGlass(el, glass) {
+        document.querySelectorAll('.glass-opt').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedGlass = glass;
+    }
+
     let activeId = null;
     function openC(r) {
         activeId = r.id;
+        const std = calculateStandardDrinks(r.ings);
         document.getElementById('m-title').innerText = r.name;
-        document.getElementById('m-glass').innerText = r.glass;
+        document.getElementById('m-glass').innerText = r.glass || '🍸';
+        document.getElementById('m-std').innerHTML = std ? `<span class="std-badge" style="font-size:14px; padding:5px 10px;">${std} Standard Drinks (RSA)</span>` : '';
         document.getElementById('m-ings').innerText = r.ings;
         document.getElementById('m-method').innerText = r.method;
         document.getElementById('edit-ings-text').value = r.ings;
@@ -152,7 +192,6 @@
     function toggleEditMode(v) {
         document.getElementById('modal-view').style.display = v ? 'none' : 'block';
         document.getElementById('modal-edit').style.display = v ? 'block' : 'none';
-        document.getElementById('btn-edit-pencil').style.display = v ? 'none' : 'block';
     }
 
     function confirmSave() {
@@ -165,46 +204,32 @@
         const n = document.getElementById('new-c-name').value;
         const i = document.getElementById('new-c-ings').value;
         const m = document.getElementById('new-c-meth').value;
+        const c = document.getElementById('new-c-color').value;
         if(!n || !i) return alert("Nom et Ingrédients requis");
-        customItems.push({ id: 'c'+Date.now(), name: n, ings: i, method: m, glass: '🍹', color: '#333' });
+        customItems.push({ id: 'c'+Date.now(), name: n, ings: i, method: m, glass: selectedGlass, color: c });
         localStorage.setItem('custom_items', JSON.stringify(customItems));
-        document.getElementById('new-c-name').value = "";
-        document.getElementById('new-c-ings').value = "";
-        document.getElementById('new-c-meth').value = "";
-        switchTab('view-list', document.querySelector('.nav-item'));
-        renderApp();
+        renderApp(); switchTab('view-list', document.querySelector('.nav-item'));
     }
 
-    function initQuiz() {
-        const all = getAppList();
-        const r = all[Math.floor(Math.random() * all.length)];
-        const qText = document.getElementById('q-text');
-        const qChoices = document.getElementById('q-choices');
-        const next = document.getElementById('q-next-btn');
-        next.style.display = 'none';
-        qText.innerHTML = `<div style="font-size:40px;">${r.glass}</div><h2 style="color:var(--gold)">${r.name}</h2><p>Ingrédients ?</p>`;
-        let opts = [r.ings];
-        while(opts.length < 4) {
-            let f = all[Math.floor(Math.random() * all.length)].ings;
-            if(!opts.includes(f)) opts.push(f);
+    function exportData() {
+        const code = btoa(JSON.stringify({ custom: customItems, edits: overrides }));
+        prompt("Ton code de sauvegarde (à copier) :", code);
+    }
+
+    function importData() {
+        const code = prompt("Colle ton code ici :");
+        if(code) {
+            const data = JSON.parse(atob(code));
+            customItems = data.custom; overrides = data.edits;
+            localStorage.setItem('custom_items', JSON.stringify(customItems));
+            localStorage.setItem('cocktail_edits', JSON.stringify(overrides));
+            renderApp(); alert("OK !");
         }
-        opts.sort(() => Math.random() - 0.5);
-        qChoices.innerHTML = "";
-        opts.forEach(o => {
-            const b = document.createElement('button');
-            b.className = 'btn-qcm';
-            b.innerText = o;
-            b.onclick = () => {
-                if(o === r.ings) b.classList.add('correct');
-                else {
-                    b.classList.add('wrong');
-                    Array.from(qChoices.children).forEach(x => { if(x.innerText === r.ings) x.classList.add('correct'); });
-                }
-                Array.from(qChoices.children).forEach(x => x.disabled = true);
-                next.style.display = 'block';
-            };
-            qChoices.appendChild(b);
-        });
+    }
+
+    function convertUnits() {
+        const val = document.getElementById('conv-val').value;
+        document.getElementById('conv-res').innerText = val ? `${val * 30} ml` : "";
     }
 
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
@@ -213,18 +238,6 @@
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        if(id === 'view-quiz') initQuiz();
-    }
-
-    function playAllAudio() {
-        let i = 0; const list = getAppList();
-        function speakNext() {
-            if(i < list.length) {
-                const u = new SpeechSynthesisUtterance(list[i].name + ". " + list[i].ings);
-                u.lang = 'fr-FR'; u.onend = () => { i++; setTimeout(speakNext, 1000); };
-                window.speechSynthesis.speak(u);
-            }
-        } speakNext();
     }
 
     window.onload = renderApp;
