@@ -3,22 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aussie Bar Master - Final Check</title>
+    <title>Aussie Bar Master - Final Edition</title>
     <style>
         :root { --gold: #d4af37; --bg: #0b0b0b; --card: #161616; --accent: #2a2a2a; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f0f0f0; padding: 10px; margin: 0; padding-bottom: 90px; }
         .container { max-width: 450px; margin: auto; }
         h1 { text-align: center; color: var(--gold); letter-spacing: 3px; font-size: 18px; text-transform: uppercase; margin: 20px 0; }
+        
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(22, 22, 22, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--accent); z-index: 1000; }
         .nav-item { color: #555; cursor: pointer; font-size: 10px; text-align: center; flex: 1; }
         .nav-item.active { color: var(--gold); }
         .nav-item span { display: block; font-size: 22px; margin-bottom: 4px; }
-        .view { display: none; }
+        
+        .view { display: none; animation: fadeIn 0.4s; }
         .view.active { display: block; }
-        .cocktail-card { background: var(--card); border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--accent); display: flex; overflow: hidden; align-items: center; cursor: pointer; }
-        .card-img { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 35px; background: #222; border-right: 1px solid var(--accent); }
-        .card-body { padding: 12px; flex-grow: 1; }
-        .card-title { font-weight: bold; font-size: 16px; color: var(--gold); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .cocktail-card { background: var(--card); border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--accent); display: flex; overflow: hidden; align-items: center; cursor: pointer; transition: 0.2s; }
+        .cocktail-card:active { background: #222; }
+        .card-img { width: 75px; height: 75px; display: flex; align-items: center; justify-content: center; font-size: 35px; background: #222; border-right: 1px solid var(--accent); }
+        .card-body { padding: 12px; flex-grow: 1; min-width: 0; }
+        .card-title { font-weight: bold; font-size: 16px; color: var(--gold); margin-bottom: 4px; }
+        .card-subtitle { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--card); border: 2px solid var(--gold); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; }
         .btn-gold { background: var(--gold); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
@@ -31,8 +38,8 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <div id="m-glass" style="font-size:50px;"></div>
         <h2 id="m-title" style="color:var(--gold);"></h2>
-        <div style="text-align: left; margin-top: 20px; font-size: 14px;">
-            <p><b>Ingrédients :</b><br><span id="m-ings" style="color:#bbb;"></span></p>
+        <div style="text-align: left; margin-top: 20px; font-size: 15px;">
+            <p><b>Ingrédients :</b><br><span id="m-ings" style="color:#ddd;"></span></p>
             <p><b>Méthode :</b><br><span id="m-method" style="color:#bbb;"></span></p>
         </div>
         <button class="btn-gold" id="m-speak-btn">🔊 ÉCOUTER</button>
@@ -48,7 +55,7 @@
     </div>
 
     <div id="view-quiz" class="view">
-        <div id="quiz-area" class="quiz-card" style="background:var(--card); padding:20px; border-radius:15px; border:1px solid var(--gold); text-align:center;"></div>
+        <div id="quiz-area" style="background:var(--card); padding:20px; border-radius:15px; border:1px solid var(--gold); text-align:center;"></div>
         <button id="next-btn" class="btn-gold" style="display:none;" onclick="generateQuiz()">SUIVANT</button>
     </div>
 
@@ -92,9 +99,9 @@
         { id: 'pin', name: "Pina Colada", glass: "🍹", color: "#fff9c4", ings: "2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", method: "Shaker ou Blender." },
         { id: 'neg', name: "Negroni", glass: "🥃", color: "#e74c3c", ings: "1oz Gin, 1oz Campari, 1oz Vermouth Rouge", method: "Mélanger 20s. Zeste orange." },
         { id: 'esp', name: "Espresso Martini", glass: "🍸", color: "#3e2723", ings: "1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", method: "Shaker fort. 3 grains café." },
-        { id: 'ruby', name: "The Ruby", glass: "🍸", color: "#ff4081", ings: "1.5oz Gin, Rhubarbe, Framboise, Vanille", method: "Signature Mr Percival. Shaker." },
-        { id: 'trop', name: "Tropico Spritz", glass: "🍹", color: "#ffab40", ings: "1oz Vodka, Pêche, Passion, Mangue, Prosecco", method: "Construire sur glace." },
-        { id: 'spic', name: "Spicy Margarita", glass: "🥃", color: "#fb8c00", ings: "2oz Tequila, Pastèque, Citron vert, Piment", method: "Signature. Bord pimenté." }
+        { id: 'ruby', name: "The Ruby", glass: "🍸", color: "#ff4081", ings: "1.5oz Gin Hendrick's, Rhubarbe, Framboise, Vanille", method: "Signature Mr Percival. Shaker." },
+        { id: 'trop', name: "Tropico Spritz", glass: "🍹", color: "#ffab40", ings: "1oz Vodka, Crème de Pêche, Passion, Mangue, Prosecco", method: "Construire sur glace." },
+        { id: 'spic', name: "Spicy Watermelon Margarita", glass: "🥃", color: "#fb8c00", ings: "2oz Tequila, Cointreau, Pastèque, Citron vert, Piment", method: "Bord pimenté." }
     ];
 
     function getAll() { return [...baseRecipes, ...customCocktails]; }
@@ -116,7 +123,13 @@
                 const card = document.createElement('div');
                 card.className = 'cocktail-card';
                 card.onclick = () => openModal(r);
-                card.innerHTML = `<div class="card-img" style="background:linear-gradient(135deg,${r.color},#000)">${r.glass}</div><div class="card-body"><div class="card-title">${r.name}</div><div style="font-size:11px;color:#777;">Détails & Recette</div></div>`;
+                card.innerHTML = `
+                    <div class="card-img" style="background:linear-gradient(135deg,${r.color},#000)">${r.glass}</div>
+                    <div class="card-body">
+                        <div class="card-title">${r.name}</div>
+                        <div class="card-subtitle">${r.ings}</div>
+                    </div>
+                `;
                 list.appendChild(card);
             }
         });
