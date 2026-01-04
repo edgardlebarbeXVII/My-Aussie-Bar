@@ -3,34 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aussie Bar Master - Final Edition</title>
+    <title>Aussie Bar Master - Visual Pro</title>
     <style>
         :root { --gold: #d4af37; --bg: #0b0b0b; --card: #161616; --accent: #2a2a2a; --green: #27ae60; --red: #e74c3c; --panic: #ff3e3e; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f0f0f0; padding: 10px; margin: 0; padding-bottom: 90px; }
         .container { max-width: 450px; margin: auto; }
         h1 { text-align: center; color: var(--gold); letter-spacing: 2px; font-size: 16px; text-transform: uppercase; margin: 15px 0; }
+        
+        /* Filtres */
         .base-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none; }
         .filter-btn { background: var(--card); border: 1px solid var(--accent); color: #aaa; padding: 6px 12px; border-radius: 15px; font-size: 11px; white-space: nowrap; cursor: pointer; }
         .filter-btn.active { background: var(--gold); color: black; border-color: var(--gold); font-weight: bold; }
+        
         .unit-switch { position: sticky; top: 10px; z-index: 100; display: flex; justify-content: flex-end; margin-bottom: 10px; }
-        .btn-unit { background: var(--gold); color: black; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; }
-        .cocktail-card { background: var(--card); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--accent); display: flex; overflow: hidden; align-items: center; cursor: pointer; }
-        .card-img { width: 65px; height: 65px; display: flex; align-items: center; justify-content: center; font-size: 25px; background: #222; border-right: 1px solid var(--accent); }
-        .card-body { padding: 10px; flex-grow: 1; min-width: 0; }
-        .card-title { font-weight: bold; font-size: 14px; color: var(--gold); margin-bottom: 2px; }
-        .card-garnish { font-size: 10px; color: #27ae60; font-style: italic; }
+        .btn-unit { background: var(--gold); color: black; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+
+        /* Cartes avec Aperçu */
+        .cocktail-card { background: var(--card); border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--accent); display: flex; overflow: hidden; align-items: stretch; cursor: pointer; }
+        .card-img { width: 70px; display: flex; align-items: center; justify-content: center; font-size: 30px; background: #222; border-right: 1px solid var(--accent); }
+        .card-body { padding: 12px; flex-grow: 1; min-width: 0; }
+        .card-title { font-weight: bold; font-size: 16px; color: var(--gold); margin-bottom: 4px; }
+        .card-garnish { font-size: 11px; color: var(--green); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; }
+        .card-preview { font-size: 12px; color: #ddd; line-height: 1.4; border-top: 1px solid #222; padding-top: 6px; }
+
+        /* Modal Panic Mode */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
+        .modal-content { background: var(--card); border: 2px solid var(--gold); padding: 20px; border-radius: 20px; width: 100%; max-width: 400px; position: relative; }
+        .panic-ings { font-size: 22px; line-height: 1.5; color: #fff; background: #222; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; }
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(22, 22, 22, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--accent); z-index: 1000; }
         .nav-item { color: #555; cursor: pointer; font-size: 9px; text-align: center; flex: 1; }
         .nav-item.active { color: var(--gold); }
         .nav-item span { display: block; font-size: 20px; margin-bottom: 4px; }
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
-        .modal-content { background: var(--card); border: 2px solid var(--gold); padding: 20px; border-radius: 20px; width: 100%; max-width: 400px; position: relative; }
-        .panic-title { font-size: 24px; color: var(--panic); text-transform: uppercase; font-weight: 900; margin-bottom: 10px; text-align: center; }
-        .panic-ings { font-size: 19px; line-height: 1.4; color: #fff; background: #222; padding: 15px; border-radius: 10px; margin-bottom: 10px; white-space: pre-line; }
+        
         .view { display: none; }
         .view.active { display: block; }
         textarea, input { background: #222; border: 1px solid var(--accent); color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; box-sizing: border-box; }
-        .btn-delete { background: #331111; color: var(--red); border: 1px solid var(--red); padding: 10px; width: 100%; border-radius: 8px; margin-top: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -39,59 +47,55 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <button onclick="toggleEditMode(true)" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:20px; color:var(--gold);">✏️</button>
         <div id="m-view-div">
-            <div class="panic-title">PANIC MODE</div>
-            <div id="m-title" style="color:var(--gold); font-size:20px; text-align:center; margin-bottom:15px; font-weight:bold;"></div>
+            <h2 id="m-title" style="color:var(--gold); font-size:24px; text-align:center; margin-top:0;"></h2>
             <div id="m-ings" class="panic-ings"></div>
-            <div style="font-size: 13px; border-left: 3px solid var(--gold); padding-left: 10px;">
-                <b>METHOD:</b> <span id="m-meth" style="color:#bbb;"></span><br>
-                <b>GARNISH:</b> <span id="m-garnish" style="color:var(--green); font-weight:bold;"></span>
+            <div style="font-size: 14px; color:#bbb; margin-bottom:15px;">
+                <p><b>METHOD:</b> <span id="m-meth"></span></p>
+                <p><b>GARNISH:</b> <span id="m-garnish" style="color:var(--green);"></span></p>
             </div>
-            <button class="btn-gold" style="background:var(--panic); color:white; border:none; padding:12px; width:100%; font-weight:bold; border-radius:8px; margin-top:15px;" onclick="closeModal()">RETOUR</button>
+            <button class="btn-gold" style="background:var(--panic); color:white; width:100%; padding:15px; border:none; border-radius:10px; font-weight:bold;" onclick="closeModal()">FERMER</button>
         </div>
         <div id="m-edit-div" style="display:none;">
             <h3 style="color:var(--gold);">Modifier</h3>
             <textarea id="edit-ings-input" rows="5"></textarea>
-            <textarea id="edit-garnish-input" rows="2"></textarea>
             <textarea id="edit-meth-input" rows="3"></textarea>
-            <button class="btn-gold" style="width:100%; padding:12px; border-radius:8px; border:none; background:var(--gold); font-weight:bold;" onclick="saveEdits()">ENREGISTRER</button>
-            <button id="delete-btn-ui" class="btn-delete" onclick="deleteCocktail()">SUPPRIMER LE COCKTAIL</button>
+            <input type="text" id="edit-garnish-input">
+            <button class="btn-gold" style="width:100%;" onclick="saveEdits()">ENREGISTRER</button>
+            <button id="del-btn" style="background:none; border:none; color:var(--red); width:100%; margin-top:10px; font-size:12px;" onclick="deleteCocktail()">Supprimer ce cocktail</button>
         </div>
     </div>
 </div>
 
 <div class="container">
-    <h1>🍸 Aussie Bar Master</h1>
+    <h1>🍸 AUSSIE BAR MASTER</h1>
     
     <div id="view-list" class="view active">
         <div class="unit-switch"><button class="btn-unit" onclick="toggleUnit()">OZ / ML</button></div>
-        <div class="base-filters" id="base-filters">
+        <div class="base-filters">
             <button class="filter-btn active" onclick="filterByBase('ALL', this)">TOUT</button>
             <button class="filter-btn" onclick="filterByBase('Vodka', this)">VODKA</button>
             <button class="filter-btn" onclick="filterByBase('Gin', this)">GIN</button>
             <button class="filter-btn" onclick="filterByBase('Tequila', this)">TEQUILA</button>
             <button class="filter-btn" onclick="filterByBase('Rhum', this)">RHUM</button>
-            <button class="filter-btn" onclick="filterByBase('Whisky', this)">WHISKY</button>
             <button class="filter-btn" onclick="filterByBase('Spritz', this)">SPRITZ</button>
         </div>
         <input type="text" id="search" placeholder="Chercher un cocktail..." oninput="render()">
         <div id="list"></div>
     </div>
 
-    <div id="view-quiz" class="view">...</div>
     <div id="view-add" class="view">
         <h2 style="color:var(--gold); text-align:center;">Nouveau</h2>
         <input type="text" id="add-name" placeholder="Nom">
-        <input type="text" id="add-base" placeholder="Base">
-        <input type="text" id="add-garnish" placeholder="Garnish">
-        <textarea id="add-ings" placeholder="Ingrédients..." rows="3"></textarea>
+        <input type="text" id="add-base" placeholder="Base (Vodka, Gin...)">
+        <input type="text" id="add-garnish" placeholder="Garniture">
+        <textarea id="add-ings" placeholder="Recette (1.5oz Vodka, etc.)" rows="3"></textarea>
         <textarea id="add-meth" placeholder="Méthode" rows="2"></textarea>
-        <button class="btn-gold" style="width:100%; padding:15px; border-radius:8px; border:none; background:var(--gold); font-weight:bold;" onclick="saveNew()">ENREGISTRER</button>
+        <button class="btn-gold" style="width:100%;" onclick="saveNew()">SAUVEGARDER</button>
     </div>
 </div>
 
 <div class="bottom-nav">
     <div class="nav-item active" onclick="tab('view-list', this)"><span>📖</span>Carte</div>
-    <div class="nav-item" onclick="tab('view-quiz', this)"><span>🧠</span>Quiz</div>
     <div class="nav-item" onclick="tab('view-add', this)"><span>➕</span>Ajout</div>
 </div>
 
@@ -99,7 +103,7 @@
     let unit = 'oz';
     let currentBase = 'ALL';
     
-    const base = [
+    const baseRecipes = [
         { id: '1', name: "Mojito", base: "Rhum", glass: "🥤", ings: "2oz Rhum blanc, 1oz Lime, 0.5oz Sucre, Menthe, Soda", garnish: "Bouquet de menthe", method: "Build & Muddle" },
         { id: '2', name: "Margarita", base: "Tequila", glass: "🍸", ings: "1.5oz Tequila, 1oz Triple Sec, 0.75oz Lime", garnish: "Sel & Lime", method: "Shake & Strain" },
         { id: '3', name: "Negroni", base: "Gin", glass: "🥃", ings: "1oz Gin, 1oz Campari, 1oz Vermouth Rouge", garnish: "Zeste d'orange", method: "Stir & Strain" },
@@ -107,34 +111,37 @@
         { id: '5', name: "Pornstar Martini", base: "Vodka", glass: "🍸", ings: "1.5oz Vodka, 1oz Passion, 0.5oz Lime, 0.5oz Sirop Vanille", garnish: "Demi passion", method: "Shake & Prosecco side" },
         { id: '6', name: "Amaretto Sour", base: "Whisky", glass: "🥃", ings: "1oz Amaretto, 1oz Bourbon, 1oz Lime, 0.5oz Sucre, Blanc d'œuf", garnish: "Cerise & Orange", method: "Dry Shake" },
         { id: '7', name: "Bloody Mary", base: "Vodka", glass: "🥤", ings: "1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron, Tabasco, Worcest., Sel céleri, Poivre", garnish: "Céleri & Citron", method: "Rolling" },
-        { id: '8', name: "Cosmopolitan", base: "Vodka", glass: "🍸", ings: "1oz Vodka, 0.5oz Triple Sec, 0.5oz Lime, 1oz Cranberry", garnish: "Zeste d'orange", method: "Shake & Strain" },
-        { id: '9', name: "Daiquiri", base: "Rhum", glass: "🍸", ings: "2oz Rhum Blanc, 1oz Lime, 0.75oz Sucre", garnish: "Lime", method: "Shake" },
-        { id: '10', name: "Pina Colada", base: "Rhum", glass: "🍹", ings: "2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", garnish: "Ananas", method: "Shake/Blender" },
-        { id: '11', name: "Long Island", base: "Multi", glass: "🥤", ings: "0.5oz Vodka, Gin, Rhum, Tequila, Triple Sec, Lime, Cola", garnish: "Citron", method: "Build" },
-        { id: '12', name: "French Martini", base: "Vodka", glass: "🍸", ings: "1.5oz Vodka, 0.5oz Chambord, 2oz Jus d'ananas", garnish: "Framboise", method: "Hard Shake" },
-        { id: '13', name: "Lychee Martini", base: "Vodka", glass: "🍸", ings: "1.5oz Vodka, 1oz Liqueur Litchi, 0.5oz Vermouth", garnish: "Litchis", method: "Shake" },
+        { id: '8', name: "Cosmopolitan", base: "Vodka", glass: "🍸", ings: "1oz Vodka, 0.5oz Triple Sec, 0.5oz Lime, 1oz Cranberry", garnish: "Zeste d'orange", method: "Shake" },
         { id: '14', name: "Aperol Spritz", base: "Spritz", glass: "🍹", ings: "3oz Prosecco, 2oz Aperol, 1oz Soda", garnish: "Orange & Olive", method: "Build" },
-        { id: '15', name: "Limoncello Spritz", base: "Spritz", glass: "🍹", ings: "2oz Limoncello, 3oz Prosecco, Soda", garnish: "Citron & Romarin", method: "Build" },
         { id: '16', name: "The Ruby", base: "Gin", glass: "🍸", ings: "1.5oz Gin, Rhubarbe, Framboise, Vanille", garnish: "Framboise", method: "Shake" },
-        { id: '17', name: "Tropico Spritz", base: "Spritz", glass: "🍹", ings: "1oz Vodka, Pêche, Passion, Mangue, Prosecco", garnish: "Fruit de la passion", method: "Build" },
         { id: '18', name: "Spicy Margarita", base: "Tequila", glass: "🥃", ings: "2oz Tequila, Pastèque, Lime, Piment", garnish: "Bord pimenté", method: "Shake" },
         { id: '19', name: "Tommy's Margo", base: "Tequila", glass: "🥃", ings: "2oz Tequila, 1oz Lime, 0.5oz Agave", garnish: "Lime", method: "Shake" }
     ];
 
-    let customs = JSON.parse(localStorage.getItem('c_v4')) || [];
-    let edits = JSON.parse(localStorage.getItem('e_v4')) || {};
+    let customs = JSON.parse(localStorage.getItem('c_v5')) || [];
+    let edits = JSON.parse(localStorage.getItem('e_v5')) || {};
 
     function getFinal() {
-        return [...base, ...customs].map(r => edits[r.id] ? {...r, ...edits[r.id]} : r);
+        return [...baseRecipes, ...customs].map(r => edits[r.id] ? {...r, ...edits[r.id]} : r);
     }
+
+    function conv(t) { return (unit === 'oz') ? t : t.replace(/(\d+(\.\d+)?)\s*oz/gi, (m, p1) => (parseFloat(p1) * 30).toFixed(0) + "ml"); }
 
     function render() {
         const q = document.getElementById('search').value.toLowerCase();
         const container = document.getElementById('list');
         container.innerHTML = "";
-        getFinal().filter(r => (currentBase === 'ALL' || r.base === currentBase)).sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
+        getFinal().filter(r => currentBase === 'ALL' || r.base === currentBase).sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
             if(r.name.toLowerCase().includes(q)) {
-                container.innerHTML += `<div class="cocktail-card" onclick="openModal('${r.id}')"><div class="card-img">${r.glass}</div><div class="card-body"><div class="card-title">${r.name}</div><div class="card-garnish">✨ ${r.garnish}</div></div></div>`;
+                container.innerHTML += `
+                <div class="cocktail-card" onclick="openModal('${r.id}')">
+                    <div class="card-img" style="background:linear-gradient(135deg,${r.color||'#222'},#000)">${r.glass}</div>
+                    <div class="card-body">
+                        <div class="card-title">${r.name}</div>
+                        <div class="card-garnish">✨ ${r.garnish}</div>
+                        <div class="card-preview">${conv(r.ings)}</div>
+                    </div>
+                </div>`;
             }
         });
     }
@@ -149,29 +156,38 @@
         document.getElementById('edit-ings-input').value = r.ings;
         document.getElementById('edit-meth-input').value = r.method;
         document.getElementById('edit-garnish-input').value = r.garnish;
-        
-        // Cacher bouton delete pour les recettes de base
-        document.getElementById('delete-btn-ui').style.display = id.startsWith('c') ? 'block' : 'none';
-        
+        document.getElementById('del-btn').style.display = id.startsWith('c') ? 'block' : 'none';
         toggleEditMode(false);
         document.getElementById('modal').style.display = 'flex';
     }
 
+    function saveEdits() {
+        edits[activeId] = { ings: document.getElementById('edit-ings-input').value, method: document.getElementById('edit-meth-input').value, garnish: document.getElementById('edit-garnish-input').value };
+        localStorage.setItem('e_v5', JSON.stringify(edits));
+        render(); closeModal();
+    }
+
     function deleteCocktail() {
-        if(confirm("Supprimer définitivement ce cocktail ?")) {
+        if(confirm("Supprimer ce cocktail ?")) {
             customs = customs.filter(c => c.id !== activeId);
-            localStorage.setItem('c_v4', JSON.stringify(customs));
+            localStorage.setItem('c_v5', JSON.stringify(customs));
             render(); closeModal();
         }
     }
 
-    function conv(t) { return (unit === 'oz') ? t : t.replace(/(\d+(\.\d+)?)\s*oz/gi, (m, p1) => (parseFloat(p1) * 30).toFixed(0) + "ml"); }
-    function filterByBase(b, el) { currentBase = b; document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); el.classList.add('active'); render(); }
-    function saveEdits() { edits[activeId] = { ings: document.getElementById('edit-ings-input').value, method: document.getElementById('edit-meth-input').value, garnish: document.getElementById('edit-garnish-input').value }; localStorage.setItem('e_v4', JSON.stringify(edits)); render(); closeModal(); }
-    function saveNew() { const n = document.getElementById('add-name').value; if(n) { customs.push({ id: 'c'+Date.now(), name: n, ings: document.getElementById('add-ings').value, base: document.getElementById('add-base').value, garnish: document.getElementById('add-garnish').value, method: document.getElementById('add-meth').value, glass: '🍸' }); localStorage.setItem('c_v4', JSON.stringify(customs)); render(); tab('view-list', document.querySelector('.nav-item')); } }
+    function saveNew() {
+        const n = document.getElementById('add-name').value;
+        if(n) {
+            customs.push({ id: 'c'+Date.now(), name: n, ings: document.getElementById('add-ings').value, base: document.getElementById('add-base').value, garnish: document.getElementById('add-garnish').value, method: document.getElementById('add-meth').value, glass: '🍸' });
+            localStorage.setItem('c_v5', JSON.stringify(customs));
+            render(); tab('view-list', document.querySelector('.nav-item'));
+        }
+    }
+
     function toggleUnit() { unit = (unit==='oz'?'ml':'oz'); render(); }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
     function toggleEditMode(v) { document.getElementById('m-view-div').style.display = v ? 'none' : 'block'; document.getElementById('m-edit-div').style.display = v ? 'block' : 'none'; }
+    function filterByBase(b, el) { currentBase = b; document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); el.classList.add('active'); render(); }
     function tab(id, el) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
     window.onload = render;
 </script>
