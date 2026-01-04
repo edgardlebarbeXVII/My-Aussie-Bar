@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aussie Bar Master - Ultimate</title>
+    <title>Aussie Bar Master - Pro Edition</title>
     <style>
         :root { --gold: #d4af37; --bg: #0b0b0b; --card: #161616; --accent: #2a2a2a; --green: #27ae60; --red: #e74c3c; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f0f0f0; padding: 10px; margin: 0; padding-bottom: 90px; }
@@ -21,87 +21,86 @@
         .card-body { padding: 12px; flex-grow: 1; min-width: 0; }
         .card-title { font-weight: bold; font-size: 16px; color: var(--gold); margin-bottom: 4px; }
         .card-subtitle { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--card); border: 2px solid var(--gold); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; position: relative; }
         .btn-gold { background: var(--gold); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
         .btn-qcm { background: #222; color: white; border: 1px solid var(--accent); padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 8px; cursor: pointer; text-align: left; font-size: 13px; }
-        .btn-qcm.correct { background: var(--green); border-color: var(--green); color: white; }
-        .btn-qcm.wrong { background: var(--red); border-color: var(--red); color: white; }
+        .btn-qcm.correct { background: var(--green); color: white; }
+        .btn-qcm.wrong { background: var(--red); color: white; }
         input, textarea { background: #222; border: 1px solid var(--accent); color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; }
-        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gold); }
+        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--gold); z-index: 10; }
     </style>
 </head>
 <body>
 
 <div id="modal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <button class="edit-btn" id="m-edit-btn">✏️</button>
-        <div id="m-display">
+        <button class="edit-btn" id="pencil-btn">✏️</button>
+        <div id="display-mode">
             <div id="m-glass" style="font-size:50px;"></div>
-            <h2 id="m-title" style="color:var(--gold);"></h2>
-            <div style="text-align: left; margin-top: 20px; font-size: 15px;">
+            <h2 id="m-title" style="color:var(--gold); margin-top:0;"></h2>
+            <div style="text-align: left; margin-top: 15px; font-size: 14px; line-height: 1.5;">
                 <p><b>Ingrédients :</b><br><span id="m-ings" style="color:#ddd;"></span></p>
                 <p><b>Méthode :</b><br><span id="m-method" style="color:#bbb;"></span></p>
             </div>
             <button class="btn-gold" id="m-speak-btn">🔊 ÉCOUTER</button>
-            <button class="btn-gold" style="background:#444; color:white; margin-top:5px;" onclick="closeModal()">FERMER</button>
+            <button class="btn-gold" style="background:#444; color:white;" onclick="closeModal()">FERMER</button>
         </div>
-        <div id="m-edit-form" style="display:none; text-align: left;">
-            <h3 style="color:var(--gold);">Modifier</h3>
-            <textarea id="edit-ings" rows="5"></textarea>
-            <textarea id="edit-method" rows="4"></textarea>
-            <button class="btn-gold" id="m-save-btn">SAUVEGARDER</button>
-            <button class="btn-gold" style="background:#444; color:white;" onclick="toggleEdit(false)">ANNULER</button>
+        <div id="edit-mode" style="display:none; text-align: left;">
+            <h3 style="color:var(--gold); margin-top:0;">Modifier la recette</h3>
+            <label style="font-size:11px; color:var(--gold)">Ingrédients :</label>
+            <textarea id="inp-ings" rows="5"></textarea>
+            <label style="font-size:11px; color:var(--gold)">Méthode :</label>
+            <textarea id="inp-meth" rows="4"></textarea>
+            <button class="btn-gold" onclick="saveChanges()">ENREGISTRER</button>
+            <button class="btn-gold" style="background:#444; color:white;" onclick="showEdit(false)">ANNULER</button>
         </div>
     </div>
 </div>
 
 <div class="container">
     <h1>🍸 Aussie Bar Master</h1>
-
     <div id="view-list" class="view active">
         <input type="text" id="search-bar" placeholder="Chercher un cocktail..." oninput="render()">
         <div id="cocktail-list"></div>
     </div>
-
     <div id="view-quiz" class="view">
-        <div id="quiz-container" style="background:var(--card); padding:20px; border-radius:20px; border:1px solid var(--gold);">
-            <div id="quiz-question" style="text-align:center;"></div>
-            <div id="quiz-options" style="margin-top:20px;"></div>
+        <div id="quiz-box" style="background:var(--card); padding:20px; border-radius:20px; border:1px solid var(--gold);">
+            <div id="q-question" style="text-align:center;"></div>
+            <div id="q-options" style="margin-top:20px;"></div>
         </div>
-        <button id="next-quiz" class="btn-gold" style="display:none; border-radius:30px;" onclick="startQuiz()">SUIVANT ➔</button>
+        <button id="q-next" class="btn-gold" style="display:none; border-radius:30px;" onclick="startQuiz()">SUIVANT ➔</button>
     </div>
-
-    <div id="view-audio" class="view" style="text-align:center; padding: 50px 20px;">
-        <span style="font-size:80px;">🎧</span>
-        <button class="btn-gold" onclick="startAudioReview()">LANCER LA RÉVISION</button>
-        <button class="btn-gold" style="background:#444; color:white;" onclick="stopAudio()">STOP</button>
+    <div id="view-audio" class="view" style="text-align:center; padding: 40px 20px;">
+        <span style="font-size:70px;">🎧</span>
+        <button class="btn-gold" onclick="runAudio()">LANCER LA RÉVISION</button>
+        <button class="btn-gold" style="background:#444; color:white;" onclick="stopVoice()">STOP</button>
     </div>
-
     <div id="view-add" class="view">
         <h2 style="color:var(--gold); text-align:center;">Nouveau Cocktail</h2>
         <input type="text" id="add-name" placeholder="Nom du cocktail">
         <textarea id="add-ings" placeholder="Ingrédients" rows="3"></textarea>
-        <textarea id="add-method" placeholder="Méthode" rows="3"></textarea>
-        <button class="btn-gold" onclick="addNewCocktail()">ENREGISTRER</button>
+        <textarea id="add-meth" placeholder="Méthode" rows="3"></textarea>
+        <button class="btn-gold" onclick="addNew()">ENREGISTRER</button>
     </div>
 </div>
 
 <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchView('view-list', this)"><span>📖</span>Carte</div>
-    <div class="nav-item" onclick="switchView('view-quiz', this)"><span>🧠</span>Quiz</div>
-    <div class="nav-item" onclick="switchView('view-audio', this)"><span>🎧</span>Audio</div>
-    <div class="nav-item" onclick="switchView('view-add', this)"><span>➕</span>Ajout</div>
+    <div class="nav-item active" onclick="switchTab('view-list', this)"><span>📖</span>Carte</div>
+    <div class="nav-item" onclick="switchTab('view-quiz', this)"><span>🧠</span>Quiz</div>
+    <div class="nav-item" onclick="switchTab('view-audio', this)"><span>🎧</span>Audio</div>
+    <div class="nav-item" onclick="switchTab('view-add', this)"><span>➕</span>Ajout</div>
 </div>
 
 <script>
-    const synth = window.speechSynthesis;
-    let overrides = JSON.parse(localStorage.getItem('cocktail_overrides')) || {};
-    let customList = JSON.parse(localStorage.getItem('custom_cocktails')) || [];
+    const voice = window.speechSynthesis;
+    let localEdits = JSON.parse(localStorage.getItem('cocktail_edits')) || {};
+    let customItems = JSON.parse(localStorage.getItem('custom_items')) || [];
     
-    const baseRecipes = [
-        { id: 'ama', name: "Amaretto Sour", glass: "🥃", color: "#a1887f", ings: "1oz Amaretto, 1oz Bourbon, 1oz Citron vert, 0.5oz Sucre, Blanc d'oeuf", method: "Dry shake puis shake avec glace." },
+    const recipes = [
         { id: 'blo', name: "Bloody Mary", glass: "🥤", color: "#d32f2f", ings: "1.5oz Vodka, 3oz Jus Tomate, 0.5oz Citron vert, Tabasco, Worcestershire, Sel de céleri, Poivre", method: "Rolling doux. Céleri et citron." },
+        { id: 'por', name: "Pornstar Martini", glass: "🍸", color: "#ff9800", ings: "1.5oz Vodka, 1oz Passion, 0.5oz Lime, 0.5oz Sirop de Vanille, Prosecco side", method: "Shaker fort." },
+        { id: 'ama', name: "Amaretto Sour", glass: "🥃", color: "#a1887f", ings: "1oz Amaretto, 1oz Bourbon, 1oz Citron vert, 0.5oz Sucre, Blanc d'oeuf", method: "Dry shake puis shake avec glace." },
         { id: 'moj', name: "Mojito", glass: "🥤", color: "#4caf50", ings: "2oz Rhum blanc, 1oz Citron vert, Menthe, 0.5oz Sucre, Soda", method: "Piler menthe/citron." },
         { id: 'spr', name: "Aperol Spritz", glass: "🍹", color: "#ff5722", ings: "3oz Prosecco, 2oz Aperol, 1oz Soda", method: "Glace, orange et olive." },
         { id: 'mar', name: "Margarita", glass: "🍸", color: "#c0ca33", ings: "1.5oz Tequila, 1oz Triple Sec, 0.75oz Citron vert", method: "Bord salé." },
@@ -109,9 +108,8 @@
         { id: 'dai', name: "Daiquiri", glass: "🍸", color: "#f1f8e9", ings: "2oz Rhum Blanc, 1oz Citron vert, 0.75oz Sucre", method: "Shaker intense." },
         { id: 'fre', name: "French Martini", glass: "🍸", color: "#9c27b0", ings: "1.5oz Vodka, 0.5oz Chambord, 2oz Jus d'ananas", method: "Shaker mousseux." },
         { id: 'lit', name: "Long Island", glass: "🥤", color: "#795548", ings: "0.5oz Vodka, Gin, Rhum, Tequila, Triple Sec, Citron, Cola", method: "Sur glace." },
-        { id: 'por', name: "Pornstar Martini", glass: "🍸", color: "#ff9800", ings: "1.5oz Vodka, 1oz Passion, 0.5oz Lime, 0.5oz Sirop de Vanille, Prosecco side", method: "Shaker fort." },
         { id: 'lyc', name: "Lychee Martini", glass: "🍸", color: "#f8bbd0", ings: "1.5oz Vodka, 1oz Liqueur Litchi, 0.5oz Vermouth", method: "Shaker." },
-        { id: 'pin', name: "Pina Colada", glass: "🍹", color: "#fff9c4", ings: "2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", method: "Shaker/Blender." },
+        { id: 'pin', name: "Pina Colada", glass: "🍹", color: "#fff9c4", ings: "2oz Rhum blanc, 1oz Coco, 3oz Jus d'ananas", method: "Shaker." },
         { id: 'neg', name: "Negroni", glass: "🥃", color: "#e74c3c", ings: "1oz Gin, 1oz Campari, 1oz Vermouth Rouge", method: "Cuillère." },
         { id: 'esp', name: "Espresso Martini", glass: "🍸", color: "#3e2723", ings: "1.5oz Vodka, 1oz Liqueur Café, 1oz Espresso", method: "Shaker fort." },
         { id: 'ruby', name: "The Ruby", glass: "🍸", color: "#ff4081", ings: "1.5oz Gin Hendrick's, Rhubarbe, Framboise, Vanille", method: "Signature." },
@@ -121,117 +119,118 @@
         { id: 'limo', name: "Limoncello Spritz", glass: "🍹", color: "#ffeb3b", ings: "2oz Limoncello, 3oz Prosecco, Soda, Romarin", method: "Verre à vin." }
     ];
 
-    function getFinal() { 
-        let all = [...baseRecipes, ...customList];
-        return all.map(r => overrides[r.id] ? {...r, ...overrides[r.id]} : r); 
+    function getFullList() {
+        let all = [...recipes, ...customItems];
+        return all.map(r => localEdits[r.id] ? {...r, ...localEdits[r.id]} : r);
     }
 
     function render() {
         const q = document.getElementById('search-bar').value.toLowerCase();
         const list = document.getElementById('cocktail-list');
         list.innerHTML = "";
-        getFinal().sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
+        getFullList().sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
             if(r.name.toLowerCase().includes(q)) {
                 const card = document.createElement('div');
                 card.className = 'cocktail-card';
-                card.onclick = () => openModal(r);
-                card.innerHTML = `<div class="card-img" style="background:linear-gradient(135deg,${r.color || '#333'},#000)">${r.glass || '🍸'}</div><div class="card-body"><div class="card-title">${r.name}</div><div class="card-subtitle">${r.ings}</div></div>`;
+                card.onclick = () => openDetails(r);
+                card.innerHTML = `<div class="card-img" style="background:linear-gradient(135deg,${r.color||'#333'},#000)">${r.glass||'🍸'}</div><div class="card-body"><div class="card-title">${r.name}</div><div class="card-subtitle">${r.ings}</div></div>`;
                 list.appendChild(card);
             }
         });
     }
 
-    function addNewCocktail() {
-        const name = document.getElementById('add-name').value;
-        const ings = document.getElementById('add-ings').value;
-        const method = document.getElementById('add-method').value;
-        if(!name || !ings) return alert("Nom et Ingrédients requis !");
-        const newItem = { id: 'c'+Date.now(), name, ings, method, glass: '🍹', color: '#333' };
-        customList.push(newItem);
-        localStorage.setItem('custom_cocktails', JSON.stringify(customList));
-        document.getElementById('add-name').value = "";
-        document.getElementById('add-ings').value = "";
-        document.getElementById('add-method').value = "";
-        switchView('view-list', document.querySelector('.nav-item'));
-        render();
-    }
-
-    function startQuiz() {
-        const all = getFinal();
-        const r = all[Math.floor(Math.random() * all.length)];
-        const question = document.getElementById('quiz-question');
-        const optionsDiv = document.getElementById('quiz-options');
-        const nextBtn = document.getElementById('next-quiz');
-        nextBtn.style.display = 'none';
-        question.innerHTML = `<div style="font-size:40px;">${r.glass || '🍸'}</div><h2 style="color:var(--gold)">${r.name}</h2><p>Quels sont les ingrédients ?</p>`;
-        let options = [r.ings];
-        while(options.length < 4) {
-            let fake = all[Math.floor(Math.random() * all.length)].ings;
-            if(!options.includes(fake)) options.push(fake);
-        }
-        options.sort(() => Math.random() - 0.5);
-        optionsDiv.innerHTML = "";
-        options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'btn-qcm';
-            btn.innerText = opt;
-            btn.onclick = () => {
-                if(opt === r.ings) btn.classList.add('correct');
-                else {
-                    btn.classList.add('wrong');
-                    Array.from(optionsDiv.children).forEach(b => { if(b.innerText === r.ings) b.classList.add('correct'); });
-                }
-                Array.from(optionsDiv.children).forEach(b => b.disabled = true);
-                nextBtn.style.display = 'block';
-            };
-            optionsDiv.appendChild(btn);
-        });
-    }
-
-    let currentId = null;
-    function openModal(r) {
-        currentId = r.id;
+    let activeId = null;
+    function openDetails(r) {
+        activeId = r.id;
         document.getElementById('m-title').innerText = r.name;
         document.getElementById('m-glass').innerText = r.glass || '🍸';
         document.getElementById('m-ings').innerText = r.ings;
         document.getElementById('m-method').innerText = r.method;
-        document.getElementById('edit-ings').value = r.ings;
-        document.getElementById('edit-method').value = r.method;
-        toggleEdit(false);
+        document.getElementById('inp-ings').value = r.ings;
+        document.getElementById('inp-meth').value = r.method;
+        document.getElementById('pencil-btn').onclick = () => showEdit(true);
+        document.getElementById('m-speak-btn').onclick = () => say(r.name + ". " + r.ings);
+        showEdit(false);
         document.getElementById('modal').style.display = 'flex';
     }
 
-    function toggleEdit(e) {
-        document.getElementById('m-display').style.display = e ? 'none' : 'block';
-        document.getElementById('m-edit-form').style.display = e ? 'block' : 'none';
+    function showEdit(val) {
+        document.getElementById('display-mode').style.display = val ? 'none' : 'block';
+        document.getElementById('edit-mode').style.display = val ? 'block' : 'none';
+        document.getElementById('pencil-btn').style.display = val ? 'none' : 'block';
     }
 
-    function saveEdit() {
-        overrides[currentId] = { ings: document.getElementById('edit-ings').value, method: document.getElementById('edit-method').value };
-        localStorage.setItem('cocktail_overrides', JSON.stringify(overrides));
+    function saveChanges() {
+        localEdits[activeId] = { ings: document.getElementById('inp-ings').value, method: document.getElementById('inp-meth').value };
+        localStorage.setItem('cocktail_edits', JSON.stringify(localEdits));
         render(); closeModal();
     }
 
-    function closeModal() { document.getElementById('modal').style.display = 'none'; }
-    function speak(t) { synth.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'fr-FR'; synth.speak(u); }
-    function stopAudio() { synth.cancel(); }
-
-    function switchView(viewId, el) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        if(viewId === 'view-quiz') startQuiz();
+    function addNew() {
+        const n = document.getElementById('add-name').value;
+        const i = document.getElementById('add-ings').value;
+        const m = document.getElementById('add-meth').value;
+        if(!n || !i) return alert("Nom et Ingrédients requis !");
+        customItems.push({ id: 'c'+Date.now(), name: n, ings: i, method: m, glass: '🍹', color: '#333' });
+        localStorage.setItem('custom_items', JSON.stringify(customItems));
+        document.getElementById('add-name').value = "";
+        document.getElementById('add-ings').value = "";
+        document.getElementById('add-meth').value = "";
+        switchTab('view-list', document.querySelector('.nav-item'));
+        render();
     }
 
-    function startAudioReview() { 
-        let i=0; const rs=getFinal(); 
-        function n() { if(i<rs.length) { const u=new SpeechSynthesisUtterance(rs[i].name+". "+rs[i].ings); u.lang='fr-FR'; u.onend=()=>{i++; setTimeout(n,1000);}; synth.speak(u); } } 
+    function startQuiz() {
+        const all = getFullList();
+        const r = all[Math.floor(Math.random() * all.length)];
+        const qBox = document.getElementById('q-question');
+        const oBox = document.getElementById('q-options');
+        const next = document.getElementById('q-next');
+        next.style.display = 'none';
+        qBox.innerHTML = `<div style="font-size:40px;">${r.glass||'🍸'}</div><h2 style="color:var(--gold)">${r.name}</h2><p>Ingrédients ?</p>`;
+        let opts = [r.ings];
+        while(opts.length < 4) {
+            let f = all[Math.floor(Math.random() * all.length)].ings;
+            if(!opts.includes(f)) opts.push(f);
+        }
+        opts.sort(() => Math.random() - 0.5);
+        oBox.innerHTML = "";
+        opts.forEach(o => {
+            const b = document.createElement('button');
+            b.className = 'btn-qcm';
+            b.innerText = o;
+            b.onclick = () => {
+                if(o === r.ings) b.classList.add('correct');
+                else {
+                    b.classList.add('wrong');
+                    Array.from(oBox.children).forEach(x => { if(x.innerText === r.ings) x.classList.add('correct'); });
+                }
+                Array.from(oBox.children).forEach(x => x.disabled = true);
+                next.style.display = 'block';
+            };
+            oBox.appendChild(b);
+        });
+    }
+
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    function say(t) { voice.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'fr-FR'; voice.speak(u); }
+    function stopVoice() { voice.cancel(); }
+
+    function switchTab(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        if(id === 'view-quiz') startQuiz();
+    }
+
+    function runAudio() { 
+        let i=0; const l=getFullList(); 
+        function n() { if(i<l.length) { const u=new SpeechSynthesisUtterance(l[i].name+". "+l[i].ings); u.lang='fr-FR'; u.onend=()=>{i++; setTimeout(n,1000);}; voice.speak(u); } } 
         n(); 
     }
 
     render();
-    document.getElementById('m-speak-btn').onclick = () => speak(`${document.getElementById('m-title').innerText}. ${document.getElementById('m-ings').innerText}`);
 </script>
 </body>
 </html>
